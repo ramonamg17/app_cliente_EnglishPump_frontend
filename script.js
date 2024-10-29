@@ -84,8 +84,8 @@ function addCard(event) {
     fetch(`${apiBaseUrl}/cards`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newCard)
-        // Remova 'redirect: 'error'' se você adicionou anteriormente
+        body: JSON.stringify(newCard),
+        mode: 'cors', // Ensure CORS is enabled
     })
     .then(response => {
         if (!response.ok) {
