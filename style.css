@@ -1,0 +1,320 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body, html {
+    height: 100%;
+    font-family: Arial, sans-serif;
+    background-color: #f8f9fa;
+}
+
+.app-container {
+    display: flex;
+    height: 100vh;
+}
+
+.sidebar {
+    width: 60px;
+    min-width: 60px; /* Define um tamanho mínimo para a sidebar */
+    background-color: #333;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 20px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+}
+
+.sidebar-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    margin-bottom: 20px;
+    text-align: center;
+    color: white;
+}
+
+.icon {
+    font-size: 24px;
+}
+
+.text {
+    font-size: 12px;
+    margin-top: 5px;
+}
+
+.sidebar-item:hover {
+    color: #ccc;
+}
+
+.main-content {
+    display: flex;
+    margin-left: 80px; /* Considera a largura da sidebar */
+    width: calc(100% - 80px);
+    padding: 20px;
+    gap: 20px;
+}
+
+.calendar-container {
+    width: 20%;
+    min-width: 270px; /* Define um tamanho mínimo para o calendário */
+    background-color: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    overflow-y: auto;
+    position: fixed;
+    top: 0;
+    left: 80px;
+    height: 100vh;
+    padding: 10px;
+}
+
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #007bff;
+    color: #fff;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    padding: 10px;
+    gap: 5px;
+}
+
+.day-name {
+    text-align: center;
+    font-weight: bold;
+    color: #555;
+    margin-bottom: 10px;
+    font-size: xx-small;
+}
+
+.day {
+    text-align: center;
+    padding: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    color: #333;
+    font-size: xx-small;
+}
+
+.day:hover {
+    background-color: #e0e0e0;
+}
+
+.day.today {
+    background-color: #007bff;
+    color: #fff;
+    font-weight: bold;
+}
+
+.day.selected {
+    background-color: #ff9800;
+    color: #fff;
+    font-weight: bold;
+}
+
+/* Estilo para os dias que possuem cards */
+.day.has-card::after {
+    content: "";
+    display: block;
+    width: 6px;
+    height: 6px;
+    background-color: #4f5255; /* Cor da bolinha */
+    border-radius: 50%;
+    margin: 2px auto 0;
+}
+
+
+.card-area {
+    display: grid;
+    gap: 20px;
+    overflow-y: auto;
+    padding-top: 20px;
+    height: 100vh;
+    width: calc(100% - 370px); /* Ajuste considerando o mínimo de sidebar (60px) + calendário (270px) + gap */
+    margin-left: calc(60px + 270px); /* Considera a largura fixa da sidebar e do calendário */
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    align-content: start;
+}
+
+.column {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.card {
+    background: #fff;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    height: 65px;
+    margin-bottom: 10px;
+    transition: all 0.3s ease; /* Suaviza a transição do efeito */
+    cursor: pointer; /* Aponta que o card é clicável */
+}
+
+/* Efeito de hover nos cards */
+.card:hover {
+    background-color: #f1f1f1;
+    transform: translateY(-1px); /* Leve elevação */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Media query para telas menores */
+@media (max-width: 768px) {
+    .card-area {
+        grid-template-columns: 1fr; /* Alterna para uma coluna em telas menores */
+        width: calc(100% - 80px); /* Ajusta para ocupar toda a largura */
+        margin-left: 80px; /* Deixa espaço apenas para a sidebar */
+    }
+}
+
+.add-card-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: #007bff;
+    color: #fff;
+    font-size: 24px;
+    border: none;
+    padding: 15px;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.add-card-btn:hover {
+    background-color: #0056b3;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    width: 320px;
+    position: relative;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.close-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 24px;
+    color: #888;
+    cursor: pointer;
+    border: none;
+    background: none;
+}
+
+.close-btn:hover {
+    color: #333;
+}
+
+.modal-content h2 {
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+.modal-content input,
+.modal-content textarea {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+.add-button {
+    width: 100%;
+    padding: 10px;
+    background-color: #28a745;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.add-button:hover {
+    background-color: #218838;
+}
+
+/* Ícone flutuante de olho */
+.eye-toggle {
+    position: fixed;
+    top: 10px;
+    right: 80px;
+    font-size: 24px;
+    cursor: pointer;
+    z-index: 10;
+    color: #333;
+}
+
+/* Efeito padrão de blur para as descrições */
+.card p {
+    filter: blur(5px); /* Aplica o blur padrão */
+    transition: filter 0.3s ease; /* Transição suave para o efeito */
+}
+
+/* Classe para remover o blur */
+.card p.visible {
+    filter: none; /* Remove o efeito de blur */
+}
+
+.save-button {
+    width: 100%;
+    padding: 10px;
+    background-color: #28a745;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    margin-bottom: 10px;
+}
+
+.save-button:hover {
+    background-color: #218838;
+}
+
+.delete-button {
+    width: 100%;
+    padding: 10px;
+    background-color: #dc3545;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.delete-button:hover {
+    background-color: #c82333;
+}

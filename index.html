@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema Moderno</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Barra Lateral -->
+        <div class="sidebar">
+            <div class="sidebar-item" onclick="showSection('calendar')">
+                <div class="icon">📅</div>
+                <span class="text">Calendar</span>
+            </div>
+            <div class="sidebar-item" onclick="showSection('cards')">
+                <div class="icon">🗂️</div>
+                <span class="text">Cards</span>
+            </div>
+            <div class="sidebar-item" onclick="showSection('settings')">
+                <div class="icon">⚙️</div>
+                <span class="text">Settings</span>
+            </div>
+        </div>
+
+        <!-- Conteúdo Principal -->
+        <div class="main-content">
+            <!-- Calendário -->
+            <div class="calendar-container">
+                <div class="calendar-header">
+                    <button onclick="prevMonth()">&#9664;</button>
+                    <p id="month-year"></p>
+                    <button onclick="nextMonth()">&#9654;</button>
+                </div>
+                <div class="calendar-grid" id="calendar-grid">
+                    <div class="day-name">Dom</div>
+                    <div class="day-name">Seg</div>
+                    <div class="day-name">Ter</div>
+                    <div class="day-name">Qua</div>
+                    <div class="day-name">Qui</div>
+                    <div class="day-name">Sex</div>
+                    <div class="day-name">Sáb</div>
+                </div>
+            </div>
+
+            <!-- Área dos Cards -->
+            <div class="card-area">
+                <div class="column" id="column1"></div>
+                <div class="column" id="column2"></div>
+            </div>
+            
+        </div>
+
+        <!-- Ícone Plus Flutuante -->
+        <button class="add-card-btn" onclick="openModal()">➕</button>
+        <!-- Ícone Visible Flutuante -->
+        <div class="eye-toggle" onclick="toggleBlur()">👁️</div>
+
+        
+
+        <!-- Modal para Adicionar Card -->
+        <!-- <div class="modal" id="modal">
+            <div class="modal-content">
+                <span class="close-btn" onclick="closeModal()">×</span>
+                <h2>Add Card</h2>
+                <input type="text" id="card-title" placeholder="Title">
+                <textarea id="card-content" placeholder="Content"></textarea>
+                <button class="add-button" onclick="addCard()" type="button">Add</button>
+            </div>
+        </div> -->
+
+        <!-- Modal para Adicionar Card -->
+        <div class="modal" id="modal">
+            <div class="modal-content">
+                <span class="close-btn" onclick="closeModal()">×</span>
+                <h2>Add Card</h2>
+                    <input type="text" id="card-title" placeholder="Title">
+                    <textarea id="card-content" placeholder="Content"></textarea>
+                    <button class="add-button" id="add-card-button" onclick="addCard(event); return false;" type="button">Add</button>
+            </div>
+        </div>
+
+        <!-- Modal de Edição do Card -->
+        <div class="modal" id="edit-modal">
+            <div class="modal-content">
+                <span class="close-btn" onclick="closeEditModal()">×</span>
+                <h2>Edit Card</h2>
+                <input type="text" id="edit-title" placeholder="Title">
+                <textarea id="edit-content" placeholder="Content"></textarea>
+                <button class="save-button" onclick="saveEdit()" type="button">Save</button>
+                <button class="delete-button" onclick="deleteCard()" type="button">Delete</button>
+            </div>
+        </div>
+
+
+    <script src="script.js"></script>
+</body>
+</html>
