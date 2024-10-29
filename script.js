@@ -211,6 +211,9 @@ function renderCalendar() {
 function updateCalendarMarks() {
     const todayFormatted = formatDate(new Date());
 
+    // Encontrar o máximo de cards em um único dia para normalização
+    const maxCardsInADay = Math.max(...Object.values(dates).map(ids => ids.length), 1);
+
     // Percorre cada dia no calendário e aplica as marcações corretas
     calendarGrid.querySelectorAll('.day').forEach(dayDiv => {
         const day = parseInt(dayDiv.textContent);
@@ -218,11 +221,20 @@ function updateCalendarMarks() {
 
         const formattedDate = formatDate(new Date(currentDate.getFullYear(), currentDate.getMonth(), day));
 
-        // Verifica se o dia tem cards e aplica a classe 'has-card' se necessário
-        if (dates[formattedDate] && dates[formattedDate].length > 0) {
+        const cardCount = dates[formattedDate] ? dates[formattedDate].length : 0;
+
+        // Verifica se o dia tem cards
+        if (cardCount > 0) {
             dayDiv.classList.add("has-card");
+
+            // Calcula a opacidade com base na quantidade de cards
+            const opacity = calculateOpacity(cardCount, maxCardsInADay);
+
+            // Aplica a opacidade à bolinha usando estilo inline
+            dayDiv.style.setProperty('--dot-opacity', opacity);
         } else {
             dayDiv.classList.remove("has-card");
+            dayDiv.style.removeProperty('--dot-opacity');
         }
 
         // Atualiza a classe 'today' para o dia atual
@@ -232,6 +244,22 @@ function updateCalendarMarks() {
         dayDiv.classList.toggle("selected", formattedDate === selectedDate);
     });
 }
+
+// Função para calcular a opacidade com base na quantidade de cards
+function calculateOpacity(cardCount, maxCards) {
+    const minOpacity = 0.3; // Opacidade mínima (mais transparente)
+    const maxOpacity = 1;   // Opacidade máxima (mais opaca)
+
+    // Evita divisão por zero
+    if (maxCards === 1) {
+        return maxOpacity;
+    }
+
+    // Normaliza a opacidade com base no número de cards
+    const opacity = minOpacity + ((cardCount - 1) / (maxCards - 1)) * (maxOpacity - minOpacity);
+    return opacity;
+}
+
 
 
 

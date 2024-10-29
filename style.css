@@ -24,9 +24,6 @@ body, html {
     flex-direction: column;
     align-items: center;
     padding-top: 20px;
-    position: fixed;
-    top: 0;
-    left: 0;
     height: 100vh;
 }
 
@@ -55,7 +52,7 @@ body, html {
 
 .main-content {
     display: flex;
-    margin-left: 80px; /* Considera a largura da sidebar */
+    flex: 1;
     width: calc(100% - 80px);
     padding: 20px;
     gap: 20px;
@@ -68,10 +65,8 @@ body, html {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     border-radius: 10px;
     overflow-y: auto;
-    position: fixed;
-    top: 0;
-    left: 80px;
-    height: 100vh;
+ 
+    /* height: 100vh; */
     padding: 10px;
 }
 
@@ -131,28 +126,29 @@ body, html {
     display: block;
     width: 6px;
     height: 6px;
-    background-color: #4f5255; /* Cor da bolinha */
+    background-color: #4f5255;
     border-radius: 50%;
     margin: 2px auto 0;
+    opacity: var(--dot-opacity, 1); /* Usa a variável --dot-opacity */
 }
 
 
 .card-area {
+    flex: 1; /* Ocupa o espaço restante */
     display: grid;
     gap: 20px;
     overflow-y: auto;
-    padding-top: 20px;
-    height: 100vh;
-    width: calc(100% - 370px); /* Ajuste considerando o mínimo de sidebar (60px) + calendário (270px) + gap */
-    margin-left: calc(60px + 270px); /* Considera a largura fixa da sidebar e do calendário */
+    padding: 20px;
     grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
     align-content: start;
+    overflow-x: hidden;
 }
 
 .column {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
+    min-width: 300px; /* Ajuste conforme necessário */
 }
 
 .card {
@@ -174,14 +170,26 @@ body, html {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
-/* Media query para telas menores */
+/* Media Query para telas menores */
 @media (max-width: 768px) {
+    /* Ajustar a sidebar */
+    .sidebar {
+        width: 50px;
+    }
+
+    /* Ocultar o calendário ou ajustar seu tamanho */
+    .calendar-container {
+        width: 100%;
+        order: 1; /* Mover o calendário para cima */
+    }
+
+    /* Área dos Cards */
     .card-area {
-        grid-template-columns: 1fr; /* Alterna para uma coluna em telas menores */
-        width: calc(100% - 80px); /* Ajusta para ocupar toda a largura */
-        margin-left: 80px; /* Deixa espaço apenas para a sidebar */
+        grid-template-columns: 1fr; /* Uma coluna em telas pequenas */
+        order: 2;
     }
 }
+
 
 .add-card-btn {
     position: fixed;
