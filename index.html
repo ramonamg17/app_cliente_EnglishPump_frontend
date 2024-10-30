@@ -60,17 +60,6 @@
         
 
         <!-- Modal para Adicionar Card -->
-        <!-- <div class="modal" id="modal">
-            <div class="modal-content">
-                <span class="close-btn" onclick="closeModal()">×</span>
-                <h2>Add Card</h2>
-                <input type="text" id="card-title" placeholder="Title">
-                <textarea id="card-content" placeholder="Content"></textarea>
-                <button class="add-button" onclick="addCard()" type="button">Add</button>
-            </div>
-        </div> -->
-
-        <!-- Modal para Adicionar Card -->
         <div class="modal" id="modal">
             <div class="modal-content">
                 <span class="close-btn" onclick="closeModal()">×</span>
@@ -86,10 +75,18 @@
             <div class="modal-content">
                 <span class="close-btn" onclick="closeEditModal()">×</span>
                 <h2>Edit Card</h2>
-                <input type="text" id="edit-title" placeholder="Title">
+                <div class="title-container">
+                    <input type="text" id="edit-title" placeholder="Title" value="">
+                    <button class="google-images-button" onclick="searchGoogleImagesFromModal()" type="button">🔍</button>
+                    <button class="youglish-button" onclick="openYouglishFromModal()" type="button">🎤</button>
+                </div>
+                
                 <textarea id="edit-content" placeholder="Content"></textarea>
-                <button class="save-button" onclick="saveEdit()" type="button">Save</button>
-                <button class="delete-button" onclick="deleteCard()" type="button">Delete</button>
+                <div class="modal-buttons">
+                    <button class="delete-button" onclick="deleteCard()" type="button">🗑️</button>
+                    <button class="save-button" onclick="saveEdit()" type="button">Save</button>
+                </div>
+                
             </div>
         </div>
 

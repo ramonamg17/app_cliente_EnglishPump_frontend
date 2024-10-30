@@ -278,7 +278,7 @@ function loadCards(date) {
         const card = cards[id];
         const cardEl = document.createElement("div");
         cardEl.className = "card";
-        cardEl.innerHTML = `<h3>${card.title}</h3><p>${card.content}</p>`;
+        cardEl.innerHTML = `<h4>${card.title}</h4><p>${card.content}</p>`;
         
         // Torna o card clicável
         cardEl.onclick = () => openEditModal(id);
@@ -399,6 +399,39 @@ function deleteCard() {
     })
     .catch(error => console.error('Erro ao excluir card:', error));
 }
+
+
+function searchGoogleImages(title) {
+    const query = encodeURIComponent(title);
+    const url = `https://www.google.com/search?tbm=isch&q=${query}`;
+    window.open(url, '_blank');
+}
+
+function searchGoogleImagesFromModal() {
+    const title = document.getElementById("edit-title").value.trim();
+    if (!title) {
+        alert("Por favor, insira um título para pesquisar no Google Imagens.");
+        return;
+    }
+    searchGoogleImages(title);
+}
+
+function openYouglish(title) {
+    const query = encodeURIComponent(title);
+    const url = `https://youglish.com/pronounce/${query}/english`;
+    window.open(url, '_blank');
+}
+
+function openYouglishFromModal() {
+    const title = document.getElementById("edit-title").value.trim();
+    if (!title) {
+        alert("Por favor, insira um título para pesquisar no YouGlish.");
+        return;
+    }
+    openYouglish(title);
+}
+
+
 
 // Carrega todos os cards ao iniciar
 document.addEventListener("DOMContentLoaded", function() {

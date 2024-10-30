@@ -64,10 +64,10 @@ body, html {
     background-color: #fff;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     border-radius: 10px;
-    overflow-y: auto;
- 
-    /* height: 100vh; */
+    overflow-y: auto; 
+    height: 300px;
     padding: 10px;
+    margin-top: 40px;
 }
 
 .calendar-header {
@@ -142,6 +142,7 @@ body, html {
     grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
     align-content: start;
     overflow-x: hidden;
+    margin-top: 5%;
 }
 
 .column {
@@ -168,6 +169,23 @@ body, html {
     background-color: #f1f1f1;
     transform: translateY(-1px); /* Leve elevação */
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+
+.card h4 {
+    font-size: 15px;
+}
+
+/* Efeito padrão de blur para as descrições */
+.card p {
+    font-size: 10px;
+    filter: blur(5px); /* Aplica o blur padrão */
+    transition: filter 0.3s ease; /* Transição suave para o efeito */
+}
+
+/* Classe para remover o blur */
+.card p.visible {
+    filter: none; /* Remove o efeito de blur */
 }
 
 /* Media Query para telas menores */
@@ -218,16 +236,105 @@ body, html {
     background: rgba(0, 0, 0, 0.6);
     justify-content: center;
     align-items: center;
+    z-index: 1000; /* Garante que o modal esteja no topo */
 }
 
 .modal-content {
     background: #fff;
-    padding: 20px;
+    padding: 30px;
     border-radius: 10px;
-    width: 320px;
+    width: 600px; /* Aumenta a largura */
+    max-width: 90%; /* Responsividade */
+    max-height: 80%; /* Limita a altura */
     position: relative;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    overflow-y: auto; /* Adiciona scroll se o conteúdo ultrapassar */
 }
+
+.modal-content input,
+.modal-content textarea {
+    font-size: 18px;
+}
+
+/* Ajusta o título do modal */
+.modal-content h2 {
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+
+.modal-buttons {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.modal-buttons button{
+    margin: 0 5px 0 5px;
+}
+
+.save-button {
+    margin-right: 10px;
+    padding: 10px;
+    background-color: #28a745;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.save-button:hover {
+    background-color: #218838;
+}
+
+.delete-button {
+    background-color: transparent;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #dc3545;
+}
+
+.delete-button:hover {
+    color: #c82333;
+}
+
+.title-container {
+    display: flex;
+    align-items: center;
+}
+
+.title-container input {
+    flex: 1;
+    margin-right: 5px;
+}
+
+.title-container button {
+    margin-left: 5px;
+    background-color: transparent;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+.google-images-button:hover {
+    color: #4285F4; /* Azul do Google */
+}
+
+.youglish-button {
+    margin-left: 5px;
+    background-color: transparent;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+.youglish-button:hover {
+    color: #E74C3C; /* Cor distintiva */
+}
+
+
 
 .close-btn {
     position: absolute;
@@ -285,44 +392,4 @@ body, html {
     color: #333;
 }
 
-/* Efeito padrão de blur para as descrições */
-.card p {
-    filter: blur(5px); /* Aplica o blur padrão */
-    transition: filter 0.3s ease; /* Transição suave para o efeito */
-}
 
-/* Classe para remover o blur */
-.card p.visible {
-    filter: none; /* Remove o efeito de blur */
-}
-
-.save-button {
-    width: 100%;
-    padding: 10px;
-    background-color: #28a745;
-    color: #fff;
-    border: none;
-    border-radius: 5px;
-    font-size: 16px;
-    cursor: pointer;
-    margin-bottom: 10px;
-}
-
-.save-button:hover {
-    background-color: #218838;
-}
-
-.delete-button {
-    width: 100%;
-    padding: 10px;
-    background-color: #dc3545;
-    color: #fff;
-    border: none;
-    border-radius: 5px;
-    font-size: 16px;
-    cursor: pointer;
-}
-
-.delete-button:hover {
-    background-color: #c82333;
-}
