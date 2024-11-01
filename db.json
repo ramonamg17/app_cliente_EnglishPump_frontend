@@ -1,15 +1,4 @@
 {
-  "cards": [
-    {
-      "id": "a946",
-      "title": "come over",
-      "content": "aparecer, visitar",
-      "dates": [
-        "2024-10-17",
-        "2024-10-18",
-        "2024-10-19"
-      ]
-    }
-  ],
-  "dates": {}
+  "cards": [],
+  "classifications": []
 }

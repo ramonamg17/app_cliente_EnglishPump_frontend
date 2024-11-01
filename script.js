@@ -1,22 +1,12 @@
-// Inicializa os dados dos cards e datas
-let cards = {};
+// script.js
+
 let dates = {};
-
-// URL base do servidor JSON (comando para ligar o servidor de desenvolcimento: json-server --watch db.json --port 3000)
-const apiBaseUrl = 'http://localhost:3000';
-
 let selectedDate = null;
 let selectedCardId = null;
 
-// Função para exibir a seção selecionada
-function showSection(section) {
-    console.log("Selected section:", section); // Apenas para teste
-}
-
 // Função para carregar todos os cards do servidor
 function loadAllCards() {
-    
-    fetch(`${apiBaseUrl}/cards`)
+    return fetch(`${apiBaseUrl}/cards`)
         .then(response => response.json())
         .then(data => {
             // Limpa o conteúdo atual de cards e dates
@@ -25,15 +15,17 @@ function loadAllCards() {
 
             // Preenche cards e dates com os dados do servidor
             data.forEach(card => {
+                // Assegura que card.dates é um array
                 cards[card.id] = {
                     id: card.id,
                     title: card.title,
                     content: card.content,
-                    dates: card.dates
+                    dates: card.dates || [],
+                    classifications: card.classifications || []
                 };
 
                 // Popula as datas com os IDs dos cards relacionados
-                card.dates.forEach(date => {
+                cards[card.id].dates.forEach(date => {
                     if (!dates[date]) dates[date] = [];
                     dates[date].push(card.id);
                 });
@@ -53,6 +45,18 @@ function loadAllCards() {
 // Função para abrir o modal
 function openModal() {
     document.getElementById("modal").style.display = "flex";
+    // Limpa os campos anteriores
+    document.getElementById("card-title").value = "";
+    document.getElementById("card-content").value = "";
+    document.getElementById("classifications-container").innerHTML = `
+        <div class="classification-input">
+            <input type="text" class="classification-field" placeholder="Classification">
+            <button type="button" class="add-classification-btn" onclick="addClassificationInput()">
+                <i class="fa-solid fa-plus"></i>
+            </button>
+        </div>
+    `;
+    setupClassificationAutocomplete();
 }
 
 // Função para fechar o modal
@@ -60,15 +64,83 @@ function closeModal() {
     document.getElementById("modal").style.display = "none";
 }
 
+// Função para abrir o modal de adicionar classificação (opcional, se desejar)
+function addClassificationInput(containerId = 'edit-classifications-container') {
+    const container = document.getElementById(containerId);
+    const classificationInput = document.createElement("div");
+    classificationInput.className = "classification-input";
+    classificationInput.innerHTML = `
+        <input type="text" class="classification-field" placeholder="Classification">
+        <button type="button" class="remove-classification-btn" onclick="removeClassificationInput(this)">
+            <i class="fa-solid fa-minus"></i>
+        </button>
+    `;
+    container.insertBefore(classificationInput, container.lastElementChild);
+    setupClassificationAutocomplete();
+}
+
+// Função para remover um campo de classificação
+function removeClassificationInput(button) {
+    const inputDiv = button.parentElement;
+    inputDiv.remove();
+}
+
+// Função para configurar o autocomplete das classificações
+function setupClassificationAutocomplete() {
+    const classificationFields = document.querySelectorAll(".classification-field");
+    const existingClassifications = getAllClassifications();
+
+    classificationFields.forEach(input => {
+        input.addEventListener("input", function() {
+            const value = this.value.trim().toLowerCase();
+            const suggestions = existingClassifications.filter(c => c.toLowerCase().includes(value));
+            showSuggestions(this, suggestions);
+        });
+    });
+}
+
+// Função para mostrar as sugestões
+function showSuggestions(input, suggestions) {
+    // Remove sugestões anteriores
+    const existingSuggestions = input.parentElement.querySelector(".suggestions");
+    if (existingSuggestions) existingSuggestions.remove();
+
+    if (suggestions.length === 0) return;
+
+    const suggestionsDiv = document.createElement("div");
+    suggestionsDiv.className = "suggestions";
+
+    suggestions.forEach(suggestion => {
+        const suggestionDiv = document.createElement("div");
+        suggestionDiv.textContent = suggestion;
+        suggestionDiv.onclick = () => {
+            input.value = suggestion;
+            suggestionsDiv.remove();
+        };
+        suggestionsDiv.appendChild(suggestionDiv);
+    });
+
+    input.parentElement.appendChild(suggestionsDiv);
+}
+
+// Função para adicionar um card
 function addCard(event) {
     if (event) event.preventDefault();
 
     const title = document.getElementById("card-title").value.trim();
     const content = document.getElementById("card-content").value.trim();
+    const classificationFields = document.querySelectorAll(".classification-field");
+    const classifications = Array.from(classificationFields).map(input => input.value.trim()).filter(value => value);
 
     if (!title || !content) {
         alert("Por favor, preencha todos os campos");
         return;
+    }
+
+    // Assegura que selectedDate esteja definido
+    if (!selectedDate) {
+        const today = new Date();
+        selectedDate = formatDate(today);
     }
 
     const newCard = {
@@ -78,14 +150,15 @@ function addCard(event) {
             selectedDate,
             getNextDate(selectedDate, 1),
             getNextDate(selectedDate, 2)
-        ]
+        ],
+        classifications: classifications
     };
 
     fetch(`${apiBaseUrl}/cards`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newCard),
-        mode: 'cors', // Ensure CORS is enabled
+        mode: 'cors',
     })
     .then(response => {
         if (!response.ok) {
@@ -105,8 +178,6 @@ function addCard(event) {
             dates[date].push(data.id);
         });
 
-        document.getElementById("card-title").value = "";
-        document.getElementById("card-content").value = "";
         closeModal();
         loadCards(selectedDate);
         updateCalendarMarks();
@@ -116,9 +187,6 @@ function addCard(event) {
         alert('Erro ao adicionar card: ' + error.message);
     });
 }
-
-
-
 
 // Função auxiliar para obter a próxima data
 function getNextDate(dateString, days) {
@@ -207,7 +275,6 @@ function renderCalendar() {
     updateCalendarMarks();
 }
 
-
 function updateCalendarMarks() {
     const todayFormatted = formatDate(new Date());
 
@@ -260,9 +327,6 @@ function calculateOpacity(cardCount, maxCards) {
     return opacity;
 }
 
-
-
-
 // Função para carregar os cards relacionados à data selecionada
 function loadCards(date) {
     const column1 = document.getElementById("column1");
@@ -277,9 +341,31 @@ function loadCards(date) {
     cardIds.forEach(id => {
         const card = cards[id];
         const cardEl = document.createElement("div");
-        cardEl.className = "card";
-        cardEl.innerHTML = `<h4>${card.title}</h4><p>${card.content}</p>`;
-        
+        cardEl.className = "card btn";
+
+        // Criar as labels de classificações
+        const classificationsEl = document.createElement("div");
+        classificationsEl.className = "card-classifications";
+
+        if (card.classifications) {
+            card.classifications.forEach(classification => {
+                const label = document.createElement("span");
+                label.className = "classification-label";
+                label.textContent = classification;
+                classificationsEl.appendChild(label);
+            });
+        }
+        cardEl.appendChild(classificationsEl);
+
+        const titleEl = document.createElement("h4");
+        titleEl.textContent = card.title;
+
+        const contentEl = document.createElement("p");
+        contentEl.textContent = card.content;
+
+        cardEl.appendChild(titleEl);
+        cardEl.appendChild(contentEl);
+
         // Torna o card clicável
         cardEl.onclick = () => openEditModal(id);
 
@@ -321,6 +407,34 @@ function openEditModal(id) {
     document.getElementById("edit-title").value = card.title;
     document.getElementById("edit-content").value = card.content;
 
+    // Limpa as classificações anteriores
+    const container = document.getElementById("edit-classifications-container");
+    container.innerHTML = '';
+
+    // Adiciona os campos de classificação
+    card.classifications.forEach(classification => {
+        const classificationInput = document.createElement("div");
+        classificationInput.className = "classification-input";
+        classificationInput.innerHTML = `
+            <input type="text" class="classification-field" value="${classification}" placeholder="Classification">
+            <button type="button" class="remove-classification-btn" onclick="removeClassificationInput(this)">
+                <i class="fa-solid fa-minus"></i>
+            </button>
+        `;
+        container.appendChild(classificationInput);
+    });
+
+    // Adiciona um botão para adicionar novas classificações
+    const addButton = document.createElement("button");
+    addButton.type = "button";
+    addButton.className = "add-classification-btn";
+    addButton.onclick = () => addClassificationInput('edit-classifications-container');
+    addButton.innerHTML = '<i class="fa-solid fa-plus"></i>';
+
+    container.appendChild(addButton);
+
+    setupClassificationAutocomplete();
+
     // Exibe o modal
     document.getElementById("edit-modal").style.display = "flex";
 }
@@ -334,6 +448,8 @@ function closeEditModal() {
 function saveEdit() {
     const newTitle = document.getElementById("edit-title").value.trim();
     const newContent = document.getElementById("edit-content").value.trim();
+    const classificationFields = document.querySelectorAll("#edit-classifications-container .classification-field");
+    const classifications = Array.from(classificationFields).map(input => input.value.trim()).filter(value => value);
 
     if (!newTitle || !newContent) {
         alert("Por favor, preencha todos os campos");
@@ -343,6 +459,7 @@ function saveEdit() {
     // Atualiza os dados do card localmente
     cards[selectedCardId].title = newTitle;
     cards[selectedCardId].content = newContent;
+    cards[selectedCardId].classifications = classifications;
 
     // Envia as atualizações para o servidor
     fetch(`${apiBaseUrl}/cards/${selectedCardId}`, {
@@ -368,7 +485,7 @@ function saveEdit() {
 // Função para apagar o card
 function deleteCard() {
     const confirmation = confirm("Tem certeza de que deseja excluir este card? Esta ação não pode ser desfeita.");
-    
+
     if (!confirmation) {
         return;
     }
@@ -382,7 +499,7 @@ function deleteCard() {
             throw new Error('Erro ao deletar card');
         }
         const card = cards[selectedCardId];
-        
+
         // Remove o card de todas as datas relacionadas localmente
         card.dates.forEach(date => {
             dates[date] = dates[date].filter(id => id !== selectedCardId);
@@ -400,7 +517,7 @@ function deleteCard() {
     .catch(error => console.error('Erro ao excluir card:', error));
 }
 
-
+// Funções para pesquisa externa (opcionais)
 function searchGoogleImages(title) {
     const query = encodeURIComponent(title);
     const url = `https://www.google.com/search?tbm=isch&q=${query}`;
@@ -431,19 +548,24 @@ function openYouglishFromModal() {
     openYouglish(title);
 }
 
-
+// Função para obter todas as classificações existentes a partir dos cards
+function getAllClassifications() {
+    const classificationsSet = new Set();
+    Object.values(cards).forEach(card => {
+        if (card.classifications) {
+            card.classifications.forEach(classification => {
+                classificationsSet.add(classification);
+            });
+        }
+    });
+    return Array.from(classificationsSet).sort();
+}
 
 // Carrega todos os cards ao iniciar
 document.addEventListener("DOMContentLoaded", function() {
-    loadAllCards();
+    loadAllCards()
+        .then(() => {
+            setupClassificationAutocomplete();
+        })
+        .catch(error => console.error('Erro ao inicializar a página:', error));
 });
-
-
-window.addEventListener('error', function(event) {
-    console.error('Erro não capturado:', event.error);
-});
-
-
-
-
-

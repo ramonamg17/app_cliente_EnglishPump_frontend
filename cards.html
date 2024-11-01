@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema Moderno</title>
+    <title>Lista de Cards</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://kit.fontawesome.com/5ef31f9b4b.js" crossorigin="anonymous"></script>
 </head>
@@ -11,13 +11,13 @@
     <div class="app-container">
         <!-- Barra Lateral -->
         <div class="sidebar">
-            <div class="sidebar-item active" onclick="window.location.href='index.html'">
+            <div class="sidebar-item" onclick="window.location.href='index.html'">
                 <div class="icon btn">
                     <img src="assets/images/calendar-solid.svg" alt="Ícone do Calendário" width="20">
                 </div>
                 <span class="text">Calendar</span>
             </div>
-            <div class="sidebar-item" onclick="window.location.href='cards.html'">
+            <div class="sidebar-item active" onclick="window.location.href='cards.html'">
                 <div class="icon btn">
                     <img src="assets/images/list-solid.svg" alt="Ícone Cards" width="20">
                 </div>
@@ -33,52 +33,30 @@
 
         <!-- Conteúdo Principal -->
         <div class="main-content">
-            <!-- Calendário -->
-            <div class="calendar-container">
-                <div class="calendar-header">
-                    <button onclick="prevMonth()">&#9664;</button>
-                    <p id="month-year"></p>
-                    <button onclick="nextMonth()">&#9654;</button>
-                </div>
-                <div class="calendar-grid" id="calendar-grid">
-                    <div class="day-name">Dom</div>
-                    <div class="day-name">Seg</div>
-                    <div class="day-name">Ter</div>
-                    <div class="day-name">Qua</div>
-                    <div class="day-name">Qui</div>
-                    <div class="day-name">Sex</div>
-                    <div class="day-name">Sáb</div>
-                </div>
+            <!-- Lista de Classificações -->
+            <div class="classification-list-container">
+                <h5>Classificações</h5>
+                <ul id="classification-list">
+                    <!-- Lista de classificações será gerada dinamicamente -->
+                </ul>
+                <!-- Botão para adicionar nova classificação -->
+                <!-- <button type="button" class="add-classification-btn" onclick="openAddClassificationModal()">
+                    <i class="fa-solid fa-plus"></i> Nova Classificação
+                </button> -->
             </div>
-
-            <!-- Área dos Cards -->
-            <div class="card-area">
-                <div class="column" id="column1"></div>
-                <div class="column" id="column2"></div>
+            <!-- Lista de Cards -->
+            <div class="cards-list">
+                <!-- A lista de cards será gerada dinamicamente -->
             </div>
         </div>
 
-        <!-- Ícone Plus Flutuante -->
-        <button class="add-card-btn btn" onclick="openModal()"><i class="fa-solid fa-plus"></i></button>
-        <!-- Ícone Visible Flutuante -->
-        <div class="eye-toggle btn" onclick="toggleBlur()"><i class="fa-regular fa-eye-slash fa-xs"></i></div>
-
-        <!-- Modal para Adicionar Card -->
-        <div class="modal" id="modal">
+        <!-- Modal para Adicionar Nova Classificação -->
+        <div class="modal" id="add-classification-modal">
             <div class="modal-content">
-                <span class="close-btn btn" onclick="closeModal()">×</span>
-                <h2>Add Card</h2>
-                <input type="text" id="card-title" placeholder="Title">
-                <div id="classifications-container">
-                    <div class="classification-input">
-                        <input type="text" class="classification-field" placeholder="Classification">
-                        <button type="button" class="add-classification-btn" onclick="addClassificationInput()">
-                            <i class="fa-solid fa-plus"></i>
-                        </button>
-                    </div>
-                </div>
-                <textarea id="card-content" placeholder="Content"></textarea>
-                <button class="add-button btn" id="add-card-button" onclick="addCard(event); return false;" type="button">Add</button>
+                <span class="close-btn btn" onclick="closeAddClassificationModal()">×</span>
+                <h2>Adicionar Classificação</h2>
+                <input type="text" id="classification-name" placeholder="Nome da Classificação">
+                <button class="save-button btn" onclick="addClassification()" type="button">Salvar</button>
             </div>
         </div>
 
@@ -113,6 +91,6 @@
 
         <!-- Scripts -->
         <script src="common.js"></script>
-        <script src="script.js"></script>
+        <script src="cards.js"></script>
     </body>
 </html>

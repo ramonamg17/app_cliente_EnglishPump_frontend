@@ -35,6 +35,12 @@ body, html {
     margin-bottom: 20px;
     text-align: center;
     color: white;
+    padding: 3px;
+    width: 55px;
+}
+
+.sidebar-item.active {
+    background-color: #4e4d4d;
 }
 
 .icon {
@@ -183,6 +189,23 @@ body, html {
     transition: filter 0.3s ease; /* Transição suave para o efeito */
 }
 
+.card-classifications {
+    display: flex;
+    flex-wrap: wrap;
+    margin-bottom: 5px;
+}
+
+.classification-label {
+    background-color: #e0e0e0;
+    color: #333;
+    border-radius: 3px;
+    padding: 2px 5px;
+    font-size: 12px;
+    margin-right: 5px;
+    margin-bottom: 5px;
+}
+
+
 /* Classe para remover o blur */
 .card p.visible {
     filter: none; /* Remove o efeito de blur */
@@ -217,9 +240,10 @@ body, html {
     color: #fff;
     font-size: 24px;
     border: none;
-    padding: 15px;
     border-radius: 50%;
     cursor: pointer;
+    width: 50px;
+    height: 50px;
 }
 
 .add-card-btn:hover {
@@ -264,13 +288,17 @@ body, html {
 
 .modal-buttons {
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
     align-items: center;
     margin-top: 20px;
 }
 
-.modal-buttons button{
-    margin: 0 5px 0 5px;
+.modal-buttons div{
+    display: flex;
+}
+
+.modal-buttons div button{
+    margin: 0 10px 0 10px;
 }
 
 .save-button {
@@ -282,6 +310,7 @@ body, html {
     border-radius: 5px;
     font-size: 16px;
     cursor: pointer;
+    height: 40px;
 }
 
 .save-button:hover {
@@ -293,11 +322,10 @@ body, html {
     border: none;
     font-size: 24px;
     cursor: pointer;
-    color: #dc3545;
 }
 
 .delete-button:hover {
-    color: #c82333;
+    color: #454444;
 }
 
 .title-container {
@@ -318,8 +346,15 @@ body, html {
     cursor: pointer;
 }
 
+.google-images-button {
+    margin-left: 5px;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+}
 .google-images-button:hover {
-    color: #4285F4; /* Azul do Google */
+    background-color: #f4f2f2; /* Cor distintiva */
 }
 
 .youglish-button {
@@ -328,10 +363,11 @@ body, html {
     border: none;
     font-size: 24px;
     cursor: pointer;
+    padding: 5px;
 }
 
 .youglish-button:hover {
-    color: #E74C3C; /* Cor distintiva */
+    background-color: #f4f2f2; /* Cor distintiva */
 }
 
 
@@ -390,6 +426,244 @@ body, html {
     cursor: pointer;
     z-index: 10;
     color: #333;
+    border-radius: 50%;
+}
+
+.btn:active {
+    transform: scale(0.95);
 }
 
 
+#classification-modal .modal-content {
+    width: 400px;
+    max-height: 80%;
+    overflow-y: auto;
+}
+
+.classification-section {
+    margin-top: 15px;
+}
+
+.classification-tree {
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin-top: 10px;
+}
+
+.classification-item {
+    margin-left: 15px;
+}
+
+.classification-item input[type="checkbox"] {
+    margin-right: 5px;
+}
+
+.classification-item label {
+    cursor: pointer;
+}
+
+
+.delete-classification-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #dc3545;
+    margin-left: 5px;
+}
+
+.delete-classification-btn:hover {
+    color: #a71d2a;
+}
+
+
+
+
+/* ------------------------------------------------------------------------------------- */
+/* Estilos para a Lista de Cards */ 
+.cards-list {
+    padding: 20px;
+    width: 100%;
+}
+
+.card-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #fff;
+    margin-bottom: 10px;
+    padding: 15px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s;
+}
+
+.card-info h4 {
+    margin-bottom: 5px;
+}
+
+.card-actions button {
+    margin-left: 5px;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+}
+
+.card-actions .edit-button:hover {
+    color: #007bff;
+}
+
+.card-actions .delete-button:hover {
+    color: #dc3545;
+}
+
+
+
+.card-item:hover {
+    background-color: #f9f9f9;
+}
+
+.classification-label {
+    background-color: #007bff;
+    color: #fff;
+    border-radius: 3px;
+    padding: 2px 5px;
+    font-size: 12px;
+    margin-right: 5px;
+    margin-bottom: 5px;
+}
+
+.main-content {
+    display: flex;
+}
+
+.cards-list {
+    flex: 3;
+    padding: 20px;
+}
+
+
+
+.add-classification-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 20px;
+    color: #007bff;
+}
+
+.add-classification-btn:hover {
+    color: #0056b3;
+}
+
+
+.classification-selector {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.selected-classifications {
+    display: flex;
+    flex-wrap: wrap;
+    margin-right: 10px;
+}
+
+.classification-tree-container {
+    flex: 1;
+    padding: 20px;
+    border-left: 1px solid #ccc;
+}
+
+.classification-tree-container h3 {
+    margin-bottom: 10px;
+}
+
+.classification-tree-navigation .classification-item {
+    cursor: pointer;
+}
+
+.classification-tree-navigation .classification-item:hover {
+    background-color: #f0f0f0;
+}
+
+.classification-item {
+    margin: 5px 0;
+}
+
+.classification-item .toggle-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    margin-right: 5px;
+}
+
+.classification-item span:hover {
+    text-decoration: underline;
+}
+
+.classification-list-container{
+    width: 260px;
+    padding: 10px;
+}
+
+.classification-list-container ul {
+    list-style: none;
+    padding: 0;
+}
+
+.classification-list-container li {
+    cursor: pointer;
+    padding: 5px 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.classification-list-container li:hover {
+    text-decoration: underline;
+    text-decoration-color: #333;
+}
+
+.classification-list-container .delete-classification-icon {
+    color: #dc3545;
+    margin-left: 10px;
+    cursor: pointer;
+}
+
+.classification-list-container .delete-classification-icon:hover {
+    color: #a71d2a;
+}
+
+.classification-list-container .classification-text {
+    flex: 1;
+    cursor: pointer;
+    font-size: 10px;
+}
+
+.classification-list-container .classification-text[contenteditable="true"] {
+    border-bottom: 1px dashed #007bff;
+}
+
+.classification-list-container .classification-actions {
+    display: flex;
+    align-items: center;
+}
+
+.classification-list-container .classification-icon {
+    color: #6c757d;
+    margin-left: 10px;
+    cursor: pointer;
+}
+
+.classification-list-container .classification-icon:hover {
+    color: #343a40;
+}
+
+.classification-icon.disabled {
+    pointer-events: none;
+    opacity: 0.5;
+}
