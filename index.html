@@ -36,25 +36,18 @@
             <!-- Calendário -->
             <div class="calendar-container">
                 <div class="calendar-header">
-                    <button onclick="prevMonth()">&#9664;</button>
+                    <button onclick="prevMonth()"><i class="fa-solid fa-angle-left" style="color: #000333;"></i></button>
                     <p id="month-year"></p>
-                    <button onclick="nextMonth()">&#9654;</button>
+                    <button onclick="nextMonth()"><i class="fa-solid fa-angle-right" style="color: #000333;"></i></button>
                 </div>
                 <div class="calendar-grid" id="calendar-grid">
-                    <div class="day-name">Dom</div>
-                    <div class="day-name">Seg</div>
-                    <div class="day-name">Ter</div>
-                    <div class="day-name">Qua</div>
-                    <div class="day-name">Qui</div>
-                    <div class="day-name">Sex</div>
-                    <div class="day-name">Sáb</div>
+                    
                 </div>
             </div>
 
-            <!-- Área dos Cards -->
-            <div class="card-area">
-                <div class="column" id="column1"></div>
-                <div class="column" id="column2"></div>
+            <!-- Container dos cards -->
+            <div class="card-container" id="card-container">
+                <!-- As colunas serão geradas dinamicamente pelo JavaScript -->
             </div>
         </div>
 
@@ -66,46 +59,54 @@
         <!-- Modal para Adicionar Card -->
         <div class="modal" id="modal">
             <div class="modal-content">
-                <span class="close-btn btn" onclick="closeModal()">×</span>
-                <h2>Add Card</h2>
-                <input type="text" id="card-title" placeholder="Title">
-                <div id="classifications-container">
-                    <div class="classification-input">
-                        <input type="text" class="classification-field" placeholder="Classification">
-                        <button type="button" class="add-classification-btn" onclick="addClassificationInput()">
-                            <i class="fa-solid fa-plus"></i>
-                        </button>
+                <div>
+                    <span class="close-btn btn" onclick="closeModal()">×</span>
+                    <h2>Add Card</h2>
+                    <input type="text" id="card-title" placeholder="Title">
+                    <div id="classifications-container">
+                        <div class="classification-input">
+                            <input type="text" class="classification-field" placeholder="Classification">
+                            <button type="button" class="add-classification-btn" onclick="addClassificationInput()">
+                                <i class="fa-solid fa-plus"></i>
+                            </button>
+                        </div>
                     </div>
+                    <textarea id="card-content" placeholder="Content"></textarea>
                 </div>
-                <textarea id="card-content" placeholder="Content"></textarea>
-                <button class="add-button btn" id="add-card-button" onclick="addCard(event); return false;" type="button">Add</button>
+                <div>
+                    <button class="add-button btn" id="add-card-button" onclick="addCard(event); return false;" type="button">Add</button>
+                </div>
             </div>
         </div>
 
         <!-- Modal de Edição do Card -->
         <div class="modal" id="edit-modal">
             <div class="modal-content">
-                <span class="close-btn btn" onclick="closeEditModal()">×</span>
-                <h2>Edit Card</h2>
-                <div class="title-container">
-                    <input type="text" id="edit-title" placeholder="Title" value="">
-                </div>
-                <div id="edit-classifications-container">
-                    <!-- Classifications inputs will be added here -->
-                </div>
-                <textarea id="edit-content" placeholder="Content"></textarea>
-                <div class="modal-buttons">
-                    <div>
-                        <button class="delete-button btn" onclick="deleteCard()" type="button"><i class="fa-solid fa-trash"></i></button>
+                <div>
+                    <span class="close-btn btn" onclick="closeEditModal()">×</span>
+                    <h2>Edit Card</h2>
+                    <div class="title-container">
+                        <input type="text" id="edit-title" placeholder="Title" value="">
                     </div>
-                    <div>
-                        <button class="google-images-button btn" onclick="searchGoogleImagesFromModal()" type="button">
-                            <img src="assets/images/googleimages.png" alt="Ícone do Google" width="100">
-                        </button>
-                        <button class="youglish-button btn" onclick="openYouglishFromModal()" type="button">
-                            <img src="assets/images/youglish.png" alt="Ícone do youglish" width="100">
-                        </button>
-                        <button class="save-button btn" onclick="saveEdit()" type="button">Save</button>
+                    <div id="edit-classifications-container">
+                        <!-- Classifications inputs will be added here -->
+                    </div>
+                    <textarea id="edit-content" placeholder="Content"></textarea>
+                </div>
+                <div>
+                    <div class="modal-buttons">
+                        <div>
+                            <button class="delete-button btn" onclick="deleteCard()" type="button"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                        <div>
+                            <button class="google-images-button btn" onclick="searchGoogleImagesFromModal()" type="button">
+                                <img src="assets/images/googleimages.png" alt="Ícone do Google" width="100">
+                            </button>
+                            <button class="youglish-button btn" onclick="openYouglishFromModal()" type="button">
+                                <img src="assets/images/youglish.png" alt="Ícone do youglish" width="100">
+                            </button>
+                            <button class="save-button btn" onclick="saveEdit()" type="button">Save</button>
+                        </div>
                     </div>
                 </div>
             </div>

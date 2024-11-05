@@ -24,7 +24,8 @@ body, html {
     flex-direction: column;
     align-items: center;
     padding-top: 20px;
-    height: 100vh;
+    height: 100vh;    
+    position: fixed;
 }
 
 .sidebar-item {
@@ -62,29 +63,37 @@ body, html {
     width: calc(100% - 80px);
     padding: 20px;
     gap: 20px;
+    margin-left: 65px
 }
 
 .calendar-container {
     width: 20%;
-    min-width: 270px; /* Define um tamanho mínimo para o calendário */
+    min-width: 290px; /* Define um tamanho mínimo para o calendário */
     background-color: #fff;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     border-radius: 10px;
     overflow-y: auto; 
-    height: 300px;
+    height: 310px;
     padding: 10px;
     margin-top: 40px;
+    position: fixed;
 }
 
 .calendar-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background-color: #007bff;
+    background-color: #526e8d;
     color: #fff;
     padding: 10px;
     border-radius: 5px;
 }
+.calendar-header>button {
+    border: none;
+    background: transparent;
+    cursor: pointer;
+}
+
 
 .calendar-grid {
     display: grid;
@@ -115,9 +124,11 @@ body, html {
 }
 
 .day.today {
-    background-color: #007bff;
-    color: #fff;
+    /* background-color: #007bff; */
+    /* color: #fff; */
+    color: #333;
     font-weight: bold;
+    border-style: outset;
 }
 
 .day.selected {
@@ -148,8 +159,29 @@ body, html {
     grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
     align-content: start;
     overflow-x: hidden;
-    margin-top: 5%;
+    margin-top: 3%;
 }
+
+.card-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 20px;
+    padding: 20px;
+    width: 100%; /* Assegura que o container ocupa toda a largura disponível */
+    box-sizing: border-box;
+    margin-left: 300px;
+    align-self: start;
+}
+
+/* Responsividade para telas menores */
+@media (max-width: 800px) {
+    .card-container {
+        grid-template-columns: 1fr;
+        display: flex;
+        flex-direction: column;
+    }
+}
+
 
 .column {
     display: flex;
@@ -160,11 +192,11 @@ body, html {
 
 .card {
     background: #fff;
-    padding: 10px;
+    padding: 5px 15px;
     border-radius: 5px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     width: 100%;
-    height: 65px;
+    height: 70px;
     margin-bottom: 10px;
     transition: all 0.3s ease; /* Suaviza a transição do efeito */
     cursor: pointer; /* Aponta que o card é clicável */
@@ -179,7 +211,10 @@ body, html {
 
 
 .card h4 {
-    font-size: 15px;
+    font-size: 10px;
+    position: relative;
+    top: -5px;
+    margin-bottom: 10px;
 }
 
 /* Efeito padrão de blur para as descrições */
@@ -187,23 +222,22 @@ body, html {
     font-size: 10px;
     filter: blur(5px); /* Aplica o blur padrão */
     transition: filter 0.3s ease; /* Transição suave para o efeito */
+    overflow: hidden;
 }
 
 .card-classifications {
     display: flex;
     flex-wrap: wrap;
-    margin-bottom: 5px;
+    justify-content: flex-end;
+    position: relative;
+    top: -10px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 3; /* Número de linhas a exibir */
+    -webkit-box-orient: vertical;
 }
 
-.classification-label {
-    background-color: #e0e0e0;
-    color: #333;
-    border-radius: 3px;
-    padding: 2px 5px;
-    font-size: 12px;
-    margin-right: 5px;
-    margin-bottom: 5px;
-}
 
 
 /* Classe para remover o blur */
@@ -236,7 +270,7 @@ body, html {
     position: fixed;
     bottom: 20px;
     right: 20px;
-    background-color: #007bff;
+    background-color: #526e8d;
     color: #fff;
     font-size: 24px;
     border: none;
@@ -247,7 +281,7 @@ body, html {
 }
 
 .add-card-btn:hover {
-    background-color: #0056b3;
+    background-color: #333;
 }
 
 .modal {
@@ -264,15 +298,17 @@ body, html {
 }
 
 .modal-content {
+    display: flex;
+    flex-direction: column;
     background: #fff;
     padding: 30px;
     border-radius: 10px;
-    width: 600px; /* Aumenta a largura */
-    max-width: 90%; /* Responsividade */
-    max-height: 80%; /* Limita a altura */
+    width: 90%;
+    height: 95%;
     position: relative;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    overflow-y: auto; /* Adiciona scroll se o conteúdo ultrapassar */
+    overflow-y: auto;
+    justify-content: space-between;
 }
 
 .modal-content input,
@@ -290,7 +326,11 @@ body, html {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    width: 100%;
     margin-top: 20px;
+    bottom: 25px;
+    right: 25px;
+    /* position: relative; */
 }
 
 .modal-buttons div{
@@ -526,13 +566,12 @@ body, html {
 }
 
 .classification-label {
-    background-color: #007bff;
+    background-color: #c5c5c5;
     color: #fff;
     border-radius: 3px;
     padding: 2px 5px;
     font-size: 12px;
     margin-right: 5px;
-    margin-bottom: 5px;
 }
 
 .main-content {

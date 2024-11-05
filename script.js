@@ -62,6 +62,7 @@ function openModal() {
 // Função para fechar o modal
 function closeModal() {
     document.getElementById("modal").style.display = "none";
+    document.getElementById("edit-modal").style.display = "none";
 }
 
 // Função para abrir o modal de adicionar classificação (opcional, se desejar)
@@ -149,7 +150,12 @@ function addCard(event) {
         dates: [
             selectedDate,
             getNextDate(selectedDate, 1),
-            getNextDate(selectedDate, 2)
+            getNextDate(selectedDate, 2),
+            getNextDate(selectedDate, 7),
+            getNextDate(selectedDate, 21),
+            getNextDate(selectedDate, 30),
+            getNextDate(selectedDate, 60),
+            getNextDate(selectedDate, 90),
         ],
         classifications: classifications
     };
@@ -209,6 +215,9 @@ window.onclick = function(event) {
     if (event.target === document.getElementById("modal")) {
         closeModal();
     }
+    if (event.target === document.getElementById("edit-modal")) {
+        closeModal();
+    }
 };
 
 const monthYear = document.getElementById("month-year");
@@ -219,18 +228,18 @@ let selectedDayDiv = null;
 
 function renderCalendar() {
     calendarGrid.innerHTML = `
-        <div class="day-name">Dom</div>
-        <div class="day-name">Seg</div>
-        <div class="day-name">Ter</div>
-        <div class="day-name">Qua</div>
-        <div class="day-name">Qui</div>
-        <div class="day-name">Sex</div>
-        <div class="day-name">Sáb</div>
+        <div class="day-name">Sun</div>
+        <div class="day-name">Mon</div>
+        <div class="day-name">Tue</div>
+        <div class="day-name">Wed</div>
+        <div class="day-name">Thu</div>
+        <div class="day-name">Fri</div>
+        <div class="day-name">Sat</div>
     `;
 
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth();
-    monthYear.textContent = currentDate.toLocaleDateString("pt-BR", { month: "long", year: "numeric" });
+    monthYear.textContent = currentDate.toLocaleDateString("en", { month: "long", year: "numeric" });
 
     const firstDayOfMonth = new Date(year, month, 1).getDay();
     const daysInMonth = new Date(year, month + 1, 0).getDate();
@@ -329,19 +338,15 @@ function calculateOpacity(cardCount, maxCards) {
 
 // Função para carregar os cards relacionados à data selecionada
 function loadCards(date) {
-    const column1 = document.getElementById("column1");
-    const column2 = document.getElementById("column2");
-    column1.innerHTML = "";
-    column2.innerHTML = "";
+    const cardContainer = document.getElementById("card-container");
+    cardContainer.innerHTML = "";
 
     const cardIds = dates[date] || [];
-    let column1Height = 0;
-    const maxHeight = window.innerHeight * 0.8;
 
     cardIds.forEach(id => {
         const card = cards[id];
         const cardEl = document.createElement("div");
-        cardEl.className = "card btn";
+        cardEl.className = "card";
 
         // Criar as labels de classificações
         const classificationsEl = document.createElement("div");
@@ -369,15 +374,11 @@ function loadCards(date) {
         // Torna o card clicável
         cardEl.onclick = () => openEditModal(id);
 
-        // Adiciona o card na coluna apropriada
-        if (column1Height + cardEl.offsetHeight <= maxHeight) {
-            column1.appendChild(cardEl);
-            column1Height += cardEl.offsetHeight + 10;
-        } else {
-            column2.appendChild(cardEl);
-        }
+        // Adiciona o card ao contêiner
+        cardContainer.appendChild(cardEl);
     });
 }
+
 
 // Funções de navegação do calendário
 function prevMonth() {
