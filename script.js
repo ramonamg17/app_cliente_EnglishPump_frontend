@@ -3,6 +3,9 @@
 let dates = {};
 let selectedDate = null;
 let selectedCardId = null;
+let currentClassifications = [];
+
+// A variável 'cards' é declarada em 'common.js' e compartilhada entre os arquivos
 
 // Função para carregar todos os cards do servidor
 function loadAllCards() {
@@ -42,69 +45,157 @@ function loadAllCards() {
         .catch(error => console.error('Erro ao carregar cards:', error));
 }
 
-// Função para abrir o modal
+// Função para abrir o modal de adicionar card
 function openModal() {
     document.getElementById("modal").style.display = "flex";
     // Limpa os campos anteriores
     document.getElementById("card-title").value = "";
     document.getElementById("card-content").value = "";
-    document.getElementById("classifications-container").innerHTML = `
-        <div class="classification-input">
-            <input type="text" class="classification-field" placeholder="Classification">
-            <button type="button" class="add-classification-btn" onclick="addClassificationInput()">
-                <i class="fa-solid fa-plus"></i>
-            </button>
-        </div>
-    `;
-    setupClassificationAutocomplete();
+    currentClassifications = []; // Reinicia as classificações
+
+    // Limpa as labels de classificações
+    document.getElementById("classifications-labels").innerHTML = "";
+
+    // Limpa o campo de input de classificação
+    document.getElementById("classification-input").value = "";
+
+    setupClassificationInput('classification-input', 'classifications-labels', 'add-classification-btn', 'classification-field');
+    setupClassificationAutocomplete('classification-input');
 }
 
-// Função para fechar o modal
+// Função para fechar o modal de adicionar card
 function closeModal() {
     document.getElementById("modal").style.display = "none";
+}
+
+// Função para abrir o modal de edição do card
+function openEditModal(id) {
+    selectedCardId = id;
+    const card = cards[id];
+
+    document.getElementById("edit-title").value = card.title;
+    document.getElementById("edit-content").value = card.content;
+
+    currentClassifications = card.classifications.slice();
+
+    const labelsContainer = document.getElementById("edit-classifications-labels");
+    labelsContainer.innerHTML = "";
+
+    currentClassifications.forEach(classification => {
+        addClassificationLabel(classification, 'edit-classifications-labels');
+    });
+
+    document.getElementById("edit-classification-input").value = "";
+
+    setupClassificationInput('edit-classification-input', 'edit-classifications-labels', 'edit-add-classification-btn', 'edit-classification-field');
+    setupClassificationAutocomplete('edit-classification-input');
+
+    document.getElementById("edit-modal").style.display = "flex";
+}
+
+// Função para fechar o modal de edição do card
+function closeEditModal() {
     document.getElementById("edit-modal").style.display = "none";
 }
 
-// Função para abrir o modal de adicionar classificação (opcional, se desejar)
-function addClassificationInput(containerId = 'edit-classifications-container') {
-    const container = document.getElementById(containerId);
-    const classificationInput = document.createElement("div");
-    classificationInput.className = "classification-input";
-    classificationInput.innerHTML = `
-        <input type="text" class="classification-field" placeholder="Classification">
-        <button type="button" class="remove-classification-btn" onclick="removeClassificationInput(this)">
-            <i class="fa-solid fa-minus"></i>
-        </button>
-    `;
-    container.insertBefore(classificationInput, container.lastElementChild);
-    setupClassificationAutocomplete();
+// Função para adicionar uma label de classificação
+function addClassificationLabel(classification, labelsContainerId) {
+    // Só adiciona à lista se ainda não estiver presente
+    if (!currentClassifications.includes(classification)) {     
+        currentClassifications.push(classification);
+    }
+
+    const labelsContainer = document.getElementById(labelsContainerId);
+
+    // Verifica se a label já existe no container para evitar duplicatas visuais
+    const existingLabels = labelsContainer.querySelectorAll('.classification-label');
+    for (let label of existingLabels) {
+        if (label.firstChild.textContent === classification) {
+            return; // Label já existe no container, não precisa adicionar novamente
+        }
+    }
+
+    const label = document.createElement('span');
+    label.className = 'classification-label';
+    label.textContent = classification;
+
+    const removeBtn = document.createElement('button');
+    removeBtn.className = 'remove-classification-btn';
+    removeBtn.innerHTML = '&times;';
+    removeBtn.onclick = function() {
+        labelsContainer.removeChild(label);
+        currentClassifications = currentClassifications.filter(c => c !== classification);
+    };
+
+    label.appendChild(removeBtn);
+    labelsContainer.appendChild(label);
 }
 
-// Função para remover um campo de classificação
-function removeClassificationInput(button) {
-    const inputDiv = button.parentElement;
-    inputDiv.remove();
-}
 
-// Função para configurar o autocomplete das classificações
-function setupClassificationAutocomplete() {
-    const classificationFields = document.querySelectorAll(".classification-field");
-    const existingClassifications = getAllClassifications();
+function setupClassificationInput(inputId, labelsContainerId, buttonId, suggestionsContainerId) {
+    const input = document.getElementById(inputId);
+    if (!input) {
+        console.error(`Elemento com ID ${inputId} não encontrado em setupClassificationInput.`);
+        return;
+    }
+    const button = document.getElementById(buttonId);
+    if (!button) {
+        console.error(`Botão com ID ${buttonId} não encontrado em setupClassificationInput.`);
+        return;
+    }
+    input.setAttribute('data-labels-container-id', labelsContainerId);
+    input.setAttribute('data-suggestions-container-id', suggestionsContainerId);
 
-    classificationFields.forEach(input => {
-        input.addEventListener("input", function() {
-            const value = this.value.trim().toLowerCase();
-            const suggestions = existingClassifications.filter(c => c.toLowerCase().includes(value));
-            showSuggestions(this, suggestions);
-        });
+    function addClassificationFromInput() {
+        if (input.value.trim() !== '') {
+            addClassificationLabel(input.value.trim(), labelsContainerId);
+            input.value = '';
+        }
+    }
+
+    input.addEventListener('keydown', function(event) {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            addClassificationFromInput();
+        }
+    });
+
+    button.addEventListener('click', function(event) {
+        event.preventDefault();
+        addClassificationFromInput();
     });
 }
 
-// Função para mostrar as sugestões
+// Função para configurar o autocomplete das classificações
+function setupClassificationAutocomplete(inputId) {
+    const input = document.getElementById(inputId);
+    if (!input) {
+        console.error(`Elemento com ID ${inputId} não encontrado em setupClassificationAutocomplete.`);
+        return;
+    }
+    const existingClassifications = getAllClassifications();
+
+    function showSuggestionsOnEvent() {
+        const value = input.value.trim().toLowerCase();
+        const suggestions = existingClassifications.filter(c => c.toLowerCase().includes(value));
+        showSuggestions(input, suggestions);
+    }
+
+    // Show suggestions when input is focused
+    input.addEventListener("focus", showSuggestionsOnEvent);
+
+    // Show suggestions when input value changes
+    input.addEventListener("input", showSuggestionsOnEvent);
+}
+
+// Função para mostrar as sugestões de classificações
 function showSuggestions(input, suggestions) {
-    // Remove sugestões anteriores
-    const existingSuggestions = input.parentElement.querySelector(".suggestions");
-    if (existingSuggestions) existingSuggestions.remove();
+    // Get the suggestions container ID from the data attribute
+    const suggestionsContainerId = input.getAttribute('data-suggestions-container-id');
+    const suggestionsContainer = document.getElementById(suggestionsContainerId);
+
+    // Remove previous suggestions
+    suggestionsContainer.innerHTML = '';
 
     if (suggestions.length === 0) return;
 
@@ -114,15 +205,29 @@ function showSuggestions(input, suggestions) {
     suggestions.forEach(suggestion => {
         const suggestionDiv = document.createElement("div");
         suggestionDiv.textContent = suggestion;
+
+        // Define behavior when clicking on a suggestion
         suggestionDiv.onclick = () => {
-            input.value = suggestion;
-            suggestionsDiv.remove();
+            addClassificationLabel(suggestion, input.getAttribute('data-labels-container-id'));
+            input.value = '';
+            suggestionsContainer.innerHTML = ''; // Remove suggestions after selection
         };
+
         suggestionsDiv.appendChild(suggestionDiv);
     });
 
-    input.parentElement.appendChild(suggestionsDiv);
+    suggestionsContainer.appendChild(suggestionsDiv);
+
+    // Add event listener to hide suggestions when clicking outside
+    document.addEventListener('click', function hideSuggestions(event) {
+        if (!suggestionsContainer.contains(event.target) && event.target !== input) {
+            suggestionsContainer.innerHTML = '';
+            document.removeEventListener('click', hideSuggestions);
+        }
+    });
 }
+
+
 
 // Função para adicionar um card
 function addCard(event) {
@@ -130,10 +235,9 @@ function addCard(event) {
 
     const title = document.getElementById("card-title").value.trim();
     const content = document.getElementById("card-content").value.trim();
-    const classificationFields = document.querySelectorAll(".classification-field");
-    const classifications = Array.from(classificationFields).map(input => input.value.trim()).filter(value => value);
+    const classifications = currentClassifications;
 
-    if (!title || !content) {
+    if (!title) {
         alert("Por favor, preencha todos os campos");
         return;
     }
@@ -210,22 +314,14 @@ function formatDate(date) {
     return `${year}-${month}-${day}`;
 }
 
-// Fecha o modal ao clicar fora do conteúdo
-window.onclick = function(event) {
-    if (event.target === document.getElementById("modal")) {
-        closeModal();
-    }
-    if (event.target === document.getElementById("edit-modal")) {
-        closeModal();
-    }
-};
-
+// Variáveis para o calendário
 const monthYear = document.getElementById("month-year");
 const calendarGrid = document.getElementById("calendar-grid");
 
 let currentDate = new Date();
 let selectedDayDiv = null;
 
+// Função para renderizar o calendário
 function renderCalendar() {
     calendarGrid.innerHTML = `
         <div class="day-name">Sun</div>
@@ -284,6 +380,7 @@ function renderCalendar() {
     updateCalendarMarks();
 }
 
+// Função para atualizar as marcações do calendário
 function updateCalendarMarks() {
     const todayFormatted = formatDate(new Date());
 
@@ -379,7 +476,6 @@ function loadCards(date) {
     });
 }
 
-
 // Funções de navegação do calendário
 function prevMonth() {
     currentDate.setMonth(currentDate.getMonth() - 1);
@@ -399,60 +495,13 @@ function toggleBlur() {
     });
 }
 
-// Função para abrir o modal de edição
-function openEditModal(id) {
-    selectedCardId = id; // Define o ID do card selecionado
-    const card = cards[id];
-
-    // Preenche o modal com as informações do card
-    document.getElementById("edit-title").value = card.title;
-    document.getElementById("edit-content").value = card.content;
-
-    // Limpa as classificações anteriores
-    const container = document.getElementById("edit-classifications-container");
-    container.innerHTML = '';
-
-    // Adiciona os campos de classificação
-    card.classifications.forEach(classification => {
-        const classificationInput = document.createElement("div");
-        classificationInput.className = "classification-input";
-        classificationInput.innerHTML = `
-            <input type="text" class="classification-field" value="${classification}" placeholder="Classification">
-            <button type="button" class="remove-classification-btn" onclick="removeClassificationInput(this)">
-                <i class="fa-solid fa-minus"></i>
-            </button>
-        `;
-        container.appendChild(classificationInput);
-    });
-
-    // Adiciona um botão para adicionar novas classificações
-    const addButton = document.createElement("button");
-    addButton.type = "button";
-    addButton.className = "add-classification-btn";
-    addButton.onclick = () => addClassificationInput('edit-classifications-container');
-    addButton.innerHTML = '<i class="fa-solid fa-plus"></i>';
-
-    container.appendChild(addButton);
-
-    setupClassificationAutocomplete();
-
-    // Exibe o modal
-    document.getElementById("edit-modal").style.display = "flex";
-}
-
-// Função para fechar o modal de edição
-function closeEditModal() {
-    document.getElementById("edit-modal").style.display = "none";
-}
-
 // Função para salvar as edições do card
 function saveEdit() {
     const newTitle = document.getElementById("edit-title").value.trim();
     const newContent = document.getElementById("edit-content").value.trim();
-    const classificationFields = document.querySelectorAll("#edit-classifications-container .classification-field");
-    const classifications = Array.from(classificationFields).map(input => input.value.trim()).filter(value => value);
+    const classifications = currentClassifications;
 
-    if (!newTitle || !newContent) {
+    if (!newTitle) {
         alert("Por favor, preencha todos os campos");
         return;
     }
@@ -562,11 +611,10 @@ function getAllClassifications() {
     return Array.from(classificationsSet).sort();
 }
 
-// Carrega todos os cards ao iniciar
+// Inicializa a página ao carregar
 document.addEventListener("DOMContentLoaded", function() {
     loadAllCards()
-        .then(() => {
-            setupClassificationAutocomplete();
-        })
         .catch(error => console.error('Erro ao inicializar a página:', error));
 });
+
+// Como removemos o código que fecha o modal ao clicar fora, não precisamos mais do manipulador de eventos 'window.onclick'

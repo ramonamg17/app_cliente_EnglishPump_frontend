@@ -63,14 +63,19 @@
                     <span class="close-btn btn" onclick="closeModal()">×</span>
                     <h2>Add Card</h2>
                     <input type="text" id="card-title" placeholder="Title">
-                    <div id="classifications-container">
-                        <div class="classification-input">
-                            <input type="text" class="classification-field" placeholder="Classification">
-                            <button type="button" class="add-classification-btn" onclick="addClassificationInput()">
-                                <i class="fa-solid fa-plus"></i>
-                            </button>
+                    
+                    <!-- Área para exibir as classificações como labels -->
+                    <div id="classifications-labels" class="classifications-labels"></div>
+                    
+                    <!-- Campo de input para adicionar novas classificações -->
+                     <div>
+                        <div class="classification-field-input">
+                            <input type="text" id="classification-input" placeholder="Add Classification">
+                            <div id="add-classification-btn" class="add-classification-btn"><i class="fa-solid fa-plus" style="color: #000333;"></i></div>
                         </div>
-                    </div>
+                        <div id="classification-field"></div>
+                     </div>
+                    
                     <textarea id="card-content" placeholder="Content"></textarea>
                 </div>
                 <div>
@@ -78,6 +83,7 @@
                 </div>
             </div>
         </div>
+
 
         <!-- Modal de Edição do Card -->
         <div class="modal" id="edit-modal">
@@ -88,9 +94,20 @@
                     <div class="title-container">
                         <input type="text" id="edit-title" placeholder="Title" value="">
                     </div>
-                    <div id="edit-classifications-container">
-                        <!-- Classifications inputs will be added here -->
+
+                    <!-- Área para exibir as classificações como labels -->
+                    <div id="edit-classifications-labels" class="classifications-labels"></div>
+
+                    <!-- Campo de input para adicionar novas classificações -->
+                    <div>
+                        <div class="classification-field-input">
+                            <input type="text" id="edit-classification-input" placeholder="Add Classification">
+                            <div id="edit-add-classification-btn" class="add-classification-btn"><i class="fa-solid fa-plus" style="color: #000333;"></i></div>
+                        </div>
+                        <!-- Add a unique suggestions container for the edit modal -->
+                        <div id="edit-classification-field"></div>
                     </div>
+
                     <textarea id="edit-content" placeholder="Content"></textarea>
                 </div>
                 <div>
@@ -111,6 +128,7 @@
                 </div>
             </div>
         </div>
+
 
         <!-- Scripts -->
         <script src="common.js"></script>
