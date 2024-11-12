@@ -35,18 +35,24 @@
         <div class="main-content">
             <!-- Lista de Classificações -->
             <div class="classification-list-container">
-                <h5>Classificações</h5>
+                <div class="classification-header">
+                    <h5>Classificações</h5>
+                    <button class="add-classification-btn btn" onclick="openAddClassificationModal()">
+                        <i class="fa-solid fa-plus"></i>
+                    </button>
+                </div>
+                <input type="text" id="classification-search-input" placeholder="Pesquisar classificações">
                 <ul id="classification-list">
                     <!-- Lista de classificações será gerada dinamicamente -->
                 </ul>
-                <!-- Botão para adicionar nova classificação -->
-                <!-- <button type="button" class="add-classification-btn" onclick="openAddClassificationModal()">
-                    <i class="fa-solid fa-plus"></i> Nova Classificação
-                </button> -->
             </div>
+
             <!-- Lista de Cards -->
             <div class="cards-list">
-                <!-- A lista de cards será gerada dinamicamente -->
+                <input type="text" id="card-search-input" placeholder="Pesquisar cards">
+                <div class="card-container" id="card-container">
+                    <!-- Os cards serão gerados dinamicamente -->
+                </div>
             </div>
         </div>
 
@@ -55,42 +61,75 @@
             <div class="modal-content">
                 <span class="close-btn btn" onclick="closeAddClassificationModal()">×</span>
                 <h2>Adicionar Classificação</h2>
-                <input type="text" id="classification-name" placeholder="Nome da Classificação">
+                <input type="text" id="new-classification-name" placeholder="Nome da Classificação">
                 <button class="save-button btn" onclick="addClassification()" type="button">Salvar</button>
             </div>
         </div>
 
-        <!-- Modal de Edição do Card -->
-        <div class="modal" id="edit-modal">
+        <!-- Modal para Adicionar e Editar Card -->
+        <div class="modal" id="modal">
+            <!-- Seção de Recalls -->
+            <div class="card-recalls off" id="card-recalls">
+                <div>
+                
+                </div>
+                <div class="card-recalls-restart desactived" onclick="RestartRecalls()" id="card-recalls-restart">
+                    <i class="fa-solid fa-rotate-left"></i>
+                </div>
+            </div>
+            <div class="modal-title">
+                <h2 id="modal-title-text">Add Card</h2>
+                <span class="close-btn btn" onclick="closeModal()">×</span>
+            </div>
             <div class="modal-content">
-                <span class="close-btn btn" onclick="closeEditModal()">×</span>
-                <h2>Edit Card</h2>
-                <div class="title-container">
-                    <input type="text" id="edit-title" placeholder="Title" value="">
-                </div>
-                <div id="edit-classifications-container">
-                    <!-- Classifications inputs will be added here -->
-                </div>
-                <textarea id="edit-content" placeholder="Content"></textarea>
-                <div class="modal-buttons">
+                <div class="modal-content-col">
+                    <input type="text" id="card-title" placeholder="Title">
+
+                    <!-- Área para exibir as classificações como labels -->
+                    <div id="classifications-labels" class="classifications-labels"></div>
+
+                    <!-- Campo de input para adicionar novas classificações -->
                     <div>
-                        <button class="delete-button btn" onclick="deleteCard()" type="button"><i class="fa-solid fa-trash"></i></button>
+                        <div class="classification-field-input">
+                            <input type="text" id="classification-input" placeholder="Add Classification">
+                            <div id="add-classification-btn" class="add-classification-btn"><i class="fa-solid fa-plus" style="color: #000333;"></i></div>
+                        </div>
+                        <div id="classification-field"></div>
                     </div>
-                    <div>
-                        <button class="google-images-button btn" onclick="searchGoogleImagesFromModal()" type="button">
-                            <img src="assets/images/googleimages.png" alt="Ícone do Google" width="100">
-                        </button>
-                        <button class="youglish-button btn" onclick="openYouglishFromModal()" type="button">
-                            <img src="assets/images/youglish.png" alt="Ícone do youglish" width="100">
-                        </button>
-                        <button class="save-button btn" onclick="saveEdit()" type="button">Save</button>
-                    </div>
+
+                    <textarea id="card-content" placeholder="Content"></textarea>
+                </div>
+                <div class="vertical-divider resizeble" style="cursor: col-resize;"></div>
+                <div class="modal-content-col llm">
+                    <!-- ... (conteúdo da coluna LLM permanece o mesmo) -->
+                </div>
+            </div>
+            <div class="modal-buttons">
+                <div>
+                    <!-- Botões comuns -->
+                    <button class="google-images-button btn" onclick="searchGoogleImagesFromModal()" type="button">
+                        <i class="fa-regular fa-images" style="font-size: 30px;"></i>
+                    </button>
+                    <button class="youglish-button btn" onclick="openYouglishFromModal()" type="button">
+                        <i class="fa-solid fa-headphones" style="font-size: 30px;"></i>
+                    </button>
+                    <button class="recall-button btn" id="recall-button" onclick="toggleRecalls(); return false;" type="button">RECALL</button>
+                </div>
+                <div>
+                    <!-- Botões que variam conforme o modo -->
+                    <button class="delete-button btn" id="delete-card-button" onclick="deleteCard()" type="button" style="display: none;"><i class="fa-solid fa-trash"></i></button>
+                    <button class="save-button btn" id="save-card-button" onclick="saveCard()" type="button">Save</button>
                 </div>
             </div>
         </div>
 
+        <!-- Ícone Plus Flutuante -->
+        <button class="add-card-btn btn" onclick="openModal('add')"><i class="fa-solid fa-plus"></i></button>
+
         <!-- Scripts -->
         <script src="common.js"></script>
+        <!-- <script src="script.js"></script> -->
         <script src="cards.js"></script>
-    </body>
+    </div>
+</body>
 </html>

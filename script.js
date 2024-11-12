@@ -4,11 +4,13 @@ let dates = {};
 let selectedDate = null;
 let selectedCardId = null;
 let currentClassifications = [];
+let currentRecallStatus = false;
+let currentCardDates = [];
 
 // A variável 'cards' é declarada em 'common.js' e compartilhada entre os arquivos
 
 // Função para carregar todos os cards do servidor
-function loadAllCards() {
+function loadAllCards(date) {
     return fetch(`${apiBaseUrl}/cards`)
         .then(response => response.json())
         .then(data => {
@@ -24,7 +26,8 @@ function loadAllCards() {
                     title: card.title,
                     content: card.content,
                     dates: card.dates || [],
-                    classifications: card.classifications || []
+                    classifications: card.classifications || [],
+                    recall:card.recall
                 };
 
                 // Popula as datas com os IDs dos cards relacionados
@@ -36,7 +39,11 @@ function loadAllCards() {
 
             // Define o dia atual como o dia selecionado
             const today = new Date();
-            selectedDate = formatDate(today);
+            if (date){
+                selectedDate = date;
+            }else{
+                selectedDate = formatDate(today);
+            }
 
             // Renderiza o calendário e carrega os cards do dia atual
             renderCalendar();
@@ -45,58 +52,183 @@ function loadAllCards() {
         .catch(error => console.error('Erro ao carregar cards:', error));
 }
 
-// Função para abrir o modal de adicionar card
-function openModal() {
+// Função para abrir o modal (adicionar ou editar)
+function openModal(mode, id) {
+    document.querySelector('.sidebar').classList.add('desactived');
     document.getElementById("modal").style.display = "flex";
-    // Limpa os campos anteriores
-    document.getElementById("card-title").value = "";
-    document.getElementById("card-content").value = "";
-    currentClassifications = []; // Reinicia as classificações
 
-    // Limpa as labels de classificações
-    document.getElementById("classifications-labels").innerHTML = "";
+    window.modalMode = mode; // 'add' ou 'edit'
+    window.selectedCardId = id || null;
 
-    // Limpa o campo de input de classificação
-    document.getElementById("classification-input").value = "";
+    const modalTitleText = document.getElementById("modal-title-text");
+    const deleteButton = document.getElementById("delete-card-button");
+
+    if (mode === 'add') {
+        modalTitleText.textContent = "Add Card";
+        document.getElementById("card-title").value = "";
+        document.getElementById("card-content").value = "";
+        currentClassifications = [];
+        document.getElementById("classifications-labels").innerHTML = "";
+        document.getElementById("classification-input").value = "";
+        deleteButton.style.display = "none";
+
+        currentRecallStatus = false;
+        currentCardDates = [];
+        updateRecallButtonUI();
+        updateCardRecallsUI();
+    } else if (mode === 'edit') {
+        modalTitleText.textContent = "Edit Card";
+        const card = cards[id];
+        document.getElementById("card-title").value = card.title;
+        document.getElementById("card-content").value = card.content;
+        currentClassifications = card.classifications.slice();
+        const labelsContainer = document.getElementById("classifications-labels");
+        labelsContainer.innerHTML = "";
+        currentClassifications.forEach(classification => {
+            addClassificationLabel(classification, 'classifications-labels');
+        });
+        document.getElementById("classification-input").value = "";
+        deleteButton.style.display = "inline-block";
+        currentRecallStatus = card.recall || false;
+        currentCardDates = card.dates ? card.dates.slice() : [];
+        updateRecallButtonUI();
+        updateCardRecallsUI();
+    }
 
     setupClassificationInput('classification-input', 'classifications-labels', 'add-classification-btn', 'classification-field');
     setupClassificationAutocomplete('classification-input');
 }
 
-// Função para fechar o modal de adicionar card
+
+// Função para fechar o modal
 function closeModal() {
     document.getElementById("modal").style.display = "none";
+    document.querySelector('.sidebar').classList.remove('desactived');
+    window.modalMode = null;
+    window.selectedCardId = null;
 }
 
-// Função para abrir o modal de edição do card
-function openEditModal(id) {
-    selectedCardId = id;
-    const card = cards[id];
+//função para (des)ativar o recall 
+function toggleRecalls() {
+    currentRecallStatus = !currentRecallStatus;
+    updateRecallButtonUI();
 
-    document.getElementById("edit-title").value = card.title;
-    document.getElementById("edit-content").value = card.content;
+    if (currentRecallStatus) {
+        if (window.modalMode === 'add') {
+            // Usa selectedDate como data inicial ao adicionar um novo card
+            
+            let initialDate = selectedDate;
+            // let initialDate = formatDate(new Date());
+            let today = formatDate(new Date()); // Pega a data de hoje
 
-    currentClassifications = card.classifications.slice();
+            // Verifica se selectedDate é anterior a hoje
+            if (selectedDate < today) {
+                initialDate = today; // Define initialDate como hoje
+            }
+            currentCardDates = [
+                initialDate,
+                getNextDate(initialDate, 1),
+                getNextDate(initialDate, 2),
+                getNextDate(initialDate, 7),
+                getNextDate(initialDate, 21),
+                getNextDate(initialDate, 30),
+                getNextDate(initialDate, 60),
+                getNextDate(initialDate, 90),
+            ];
+        } else if (window.modalMode === 'edit') {
+            // Reintroduz o card no mapeamento 'dates' usando as datas existentes
+            currentCardDates.forEach(date => {
+                if (!dates[date]) dates[date] = [];
+                if (!dates[date].includes(window.selectedCardId)) {
+                    dates[date].push(window.selectedCardId);
+                }
+            });
+        }
+    } else {
+        if (window.modalMode === 'edit') {
+            // Remove o card do mapeamento 'dates', mas mantém as datas no card
+            currentCardDates.forEach(date => {
+                if (dates[date]) {
+                    dates[date] = dates[date].filter(id => id !== window.selectedCardId);
+                    if (dates[date].length === 0) delete dates[date];
+                }
+            });
+        }
+        // Em modo 'add', as datas já não estão no mapeamento 'dates'
+    }
 
-    const labelsContainer = document.getElementById("edit-classifications-labels");
-    labelsContainer.innerHTML = "";
+    updateCardRecallsUI();
+}
 
-    currentClassifications.forEach(classification => {
-        addClassificationLabel(classification, 'edit-classifications-labels');
+
+
+//Atualiza a aparência dos botões relacionados ao recall com base no estado atual.
+function updateRecallButtonUI() {
+    const recall_button = document.getElementById("recall-button");
+    const card_recalls = document.getElementById("card-recalls");
+    const recall_button_restart = document.getElementById("card-recalls-restart");
+
+    if (currentRecallStatus) {
+        recall_button.classList.add('actived');
+        card_recalls.classList.remove('off');
+        recall_button_restart.classList.remove('desactived');
+    } else {
+        recall_button.classList.remove('actived');
+        card_recalls.classList.add('off');
+        recall_button_restart.classList.add('desactived');
+    }
+}
+
+//Atualiza os ícones que representam as datas de recall no modal
+function updateCardRecallsUI() {
+    const card_recalls_div = document.querySelector('.card-recalls > div:first-child');
+    card_recalls_div.innerHTML = ''; // Limpa os ícones existentes
+    
+    if (!currentCardDates || currentCardDates.length === 0) return;
+
+    const today = formatDate(new Date());
+    currentCardDates.forEach(date => {
+        const icon = document.createElement('i');
+        if (date < today) {
+            icon.className = 'fa-regular fa-circle-check';
+        } else {
+            icon.className = 'fa-regular fa-circle';
+        }
+        card_recalls_div.appendChild(icon);
     });
-
-    document.getElementById("edit-classification-input").value = "";
-
-    setupClassificationInput('edit-classification-input', 'edit-classifications-labels', 'edit-add-classification-btn', 'edit-classification-field');
-    setupClassificationAutocomplete('edit-classification-input');
-
-    document.getElementById("edit-modal").style.display = "flex";
 }
 
-// Função para fechar o modal de edição do card
-function closeEditModal() {
-    document.getElementById("edit-modal").style.display = "none";
+
+
+//função para restar do recall 
+function RestartRecalls() {
+
+    const confirmation = confirm("Tem certeza de que recomeçar o recall? Esta ação não pode ser desfeita.");
+
+    if (!confirmation) {
+        return;
+    }
+
+    const today = formatDate(new Date());
+    currentCardDates = [
+        today,
+        getNextDate(today, 1),
+        getNextDate(today, 2),
+        getNextDate(today, 7),
+        getNextDate(today, 21),
+        getNextDate(today, 30),
+        getNextDate(today, 60),
+        getNextDate(today, 90),
+    ];
+
+    updateCardRecallsUI();
+    saveCard(true)
 }
+
+
+
+
+
 
 // Função para adicionar uma label de classificação
 function addClassificationLabel(classification, labelsContainerId) {
@@ -229,74 +361,74 @@ function showSuggestions(input, suggestions) {
 
 
 
-// Função para adicionar um card
-function addCard(event) {
-    if (event) event.preventDefault();
+// // Função para adicionar um card
+// function addCard(event) {
+//     if (event) event.preventDefault();
 
-    const title = document.getElementById("card-title").value.trim();
-    const content = document.getElementById("card-content").value.trim();
-    const classifications = currentClassifications;
+//     const title = document.getElementById("card-title").value.trim();
+//     const content = document.getElementById("card-content").value.trim();
+//     const classifications = currentClassifications;
 
-    if (!title) {
-        alert("Por favor, preencha todos os campos");
-        return;
-    }
+//     if (!title) {
+//         alert("Por favor, preencha todos os campos");
+//         return;
+//     }
 
-    // Assegura que selectedDate esteja definido
-    if (!selectedDate) {
-        const today = new Date();
-        selectedDate = formatDate(today);
-    }
+//     // Assegura que selectedDate esteja definido
+//     const today = new Date();
+//     if (!selectedDate) {
+//         selectedDate = formatDate(today);
+//     }
 
-    const newCard = {
-        title: title,
-        content: content,
-        dates: [
-            selectedDate,
-            getNextDate(selectedDate, 1),
-            getNextDate(selectedDate, 2),
-            getNextDate(selectedDate, 7),
-            getNextDate(selectedDate, 21),
-            getNextDate(selectedDate, 30),
-            getNextDate(selectedDate, 60),
-            getNextDate(selectedDate, 90),
-        ],
-        classifications: classifications
-    };
+//     const newCard = {
+//         title: title,
+//         content: content,
+//         dates: [
+//             selectedDate,
+//             getNextDate(selectedDate, 1),
+//             getNextDate(selectedDate, 2),
+//             getNextDate(selectedDate, 7),
+//             getNextDate(selectedDate, 21),
+//             getNextDate(selectedDate, 30),
+//             getNextDate(selectedDate, 60),
+//             getNextDate(selectedDate, 90),
+//         ],
+//         classifications: classifications
+//     };
 
-    fetch(`${apiBaseUrl}/cards`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newCard),
-        mode: 'cors',
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error(`Erro na resposta do servidor: ${response.status} ${response.statusText}`);
-        }
-        return response.json();
-    })
-    .then(data => {
-        if (!data || !data.id) {
-            throw new Error('Resposta do servidor inválida. Dados retornados: ' + JSON.stringify(data));
-        }
+//     fetch(`${apiBaseUrl}/cards`, {
+//         method: 'POST',
+//         headers: { 'Content-Type': 'application/json' },
+//         body: JSON.stringify(newCard),
+//         mode: 'cors',
+//     })
+//     .then(response => {
+//         if (!response.ok) {
+//             throw new Error(`Erro na resposta do servidor: ${response.status} ${response.statusText}`);
+//         }
+//         return response.json();
+//     })
+//     .then(data => {
+//         if (!data || !data.id) {
+//             throw new Error('Resposta do servidor inválida. Dados retornados: ' + JSON.stringify(data));
+//         }
 
-        // Atualiza os dados localmente sem alterar `selectedDate`
-        cards[data.id] = data;
-        data.dates.forEach(date => {
-            if (!dates[date]) dates[date] = [];
-            dates[date].push(data.id);
-        });
+//         // Atualiza os dados localmente sem alterar `selectedDate`
+//         cards[data.id] = data;
+//         data.dates.forEach(date => {
+//             if (!dates[date]) dates[date] = [];
+//             dates[date].push(data.id);
+//         });
 
-        closeModal();
-        loadCards(selectedDate);
-        updateCalendarMarks();
-    })
-    .catch(error => {
-        console.error('Erro ao adicionar card:', error);
-        alert('Erro ao adicionar card: ' + error.message);
-    });
-}
+//         closeModal();
+//         loadCards(selectedDate);
+//         updateCalendarMarks();
+//     })
+//     .catch(error => {
+//         console.error('Erro ao adicionar card:', error);
+//         alert('Erro ao adicionar card: ' + error.message);
+//     });
+// }
 
 // Função auxiliar para obter a próxima data
 function getNextDate(dateString, days) {
@@ -391,9 +523,9 @@ function updateCalendarMarks() {
     calendarGrid.querySelectorAll('.day').forEach(dayDiv => {
         const day = parseInt(dayDiv.textContent);
         if (isNaN(day)) return; // Ignora os espaços vazios
-
+        
         const formattedDate = formatDate(new Date(currentDate.getFullYear(), currentDate.getMonth(), day));
-
+        
         const cardCount = dates[formattedDate] ? dates[formattedDate].length : 0;
 
         // Verifica se o dia tem cards
@@ -442,6 +574,7 @@ function loadCards(date) {
 
     cardIds.forEach(id => {
         const card = cards[id];
+        // Como o card está em 'dates', o 'recall' já é true
         const cardEl = document.createElement("div");
         cardEl.className = "card";
 
@@ -468,13 +601,15 @@ function loadCards(date) {
         cardEl.appendChild(titleEl);
         cardEl.appendChild(contentEl);
 
-        // Torna o card clicável
-        cardEl.onclick = () => openEditModal(id);
+        // Torna o card clicável para edição
+        cardEl.onclick = () => openModal('edit', id);
 
         // Adiciona o card ao contêiner
         cardContainer.appendChild(cardEl);
     });
 }
+
+
 
 // Funções de navegação do calendário
 function prevMonth() {
@@ -495,42 +630,120 @@ function toggleBlur() {
     });
 }
 
-// Função para salvar as edições do card
-function saveEdit() {
-    const newTitle = document.getElementById("edit-title").value.trim();
-    const newContent = document.getElementById("edit-content").value.trim();
+// Função para salvar o card (adicionar ou editar)
+function saveCard(close_modal) {
+    const title = document.getElementById("card-title").value.trim();
+    const content = document.getElementById("card-content").value.trim();
     const classifications = currentClassifications;
 
-    if (!newTitle) {
+    if (!title) {
         alert("Por favor, preencha todos os campos");
         return;
     }
 
-    // Atualiza os dados do card localmente
-    cards[selectedCardId].title = newTitle;
-    cards[selectedCardId].content = newContent;
-    cards[selectedCardId].classifications = classifications;
+    if (window.modalMode === 'add') {
+        const newCard = {
+            title: title,
+            content: content,
+            classifications: classifications,
+            recall: currentRecallStatus,
+            dates: currentCardDates.slice()
+        };
 
-    // Envia as atualizações para o servidor
-    fetch(`${apiBaseUrl}/cards/${selectedCardId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(cards[selectedCardId])
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Erro ao salvar edições do card');
+        fetch(`${apiBaseUrl}/cards`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(newCard),
+            mode: 'cors',
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Erro na resposta do servidor: ${response.status} ${response.statusText}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (!data || !data.id) {
+                throw new Error('Resposta do servidor inválida. Dados retornados: ' + JSON.stringify(data));
+            }
+
+            // Atualiza os dados localmente
+            cards[data.id] = data;
+
+            if (currentRecallStatus) {
+                data.dates.forEach(date => {
+                    if (!dates[date]) dates[date] = [];
+                    dates[date].push(data.id);
+                });
+            } 
+            
+           
+            
+            closeModal();
+            loadAllCards(selectedDate)
+            loadCards(selectedDate);
+            updateCalendarMarks();
+        })
+        .catch(error => {
+            console.error('Erro ao adicionar card:', error);
+            alert('Erro ao adicionar card: ' + error.message);
+        });
+    } else if (window.modalMode === 'edit') {
+        // Atualiza os dados do card localmente
+        cards[window.selectedCardId].title = title;
+        cards[window.selectedCardId].content = content;
+        cards[window.selectedCardId].classifications = classifications;
+        cards[window.selectedCardId].recall = currentRecallStatus;
+
+        // Mantém as datas do card
+        cards[window.selectedCardId].dates = currentCardDates.slice();
+
+        // Remove o card das datas antigas no mapeamento 'dates'
+        const oldDates = cards[window.selectedCardId].dates || [];
+        oldDates.forEach(date => {
+            if (dates[date]) {
+                dates[date] = dates[date].filter(id => id !== window.selectedCardId);
+                if (dates[date].length === 0) delete dates[date];
+            }
+        });
+
+        if (currentRecallStatus) {
+            // Adiciona o card às novas datas no mapeamento 'dates'
+            cards[window.selectedCardId].dates.forEach(date => {
+                if (!dates[date]) dates[date] = [];
+                dates[date].push(window.selectedCardId);
+            });
+        } else {
+            // Não remove as datas do card; apenas não o adiciona ao mapeamento 'dates'
         }
-        return response.json();
-    })
-    .then(() => {
-        // Atualiza a interface com os dados editados
-        closeEditModal();
-        loadCards(selectedDate);
-        updateCalendarMarks();
-    })
-    .catch(error => console.error('Erro ao salvar edições do card:', error));
+
+        // Envia as atualizações para o servidor
+        fetch(`${apiBaseUrl}/cards/${window.selectedCardId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(cards[window.selectedCardId])
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Erro ao salvar edições do card');
+            }
+            return response.json();
+        })
+        .then(() => {
+            // Atualiza a interface com os dados editados
+            if(!close_modal){
+                closeModal();
+            }
+            loadAllCards(selectedDate)
+            loadCards(selectedDate);
+            updateCalendarMarks();
+        })
+        .catch(error => console.error('Erro ao salvar edições do card:', error));
+    }
 }
+
+
+
 
 // Função para apagar o card
 function deleteCard() {
@@ -540,32 +753,35 @@ function deleteCard() {
         return;
     }
 
-    // Envia a requisição DELETE para o servidor usando o ID correto
-    fetch(`${apiBaseUrl}/cards/${selectedCardId}`, {
+    fetch(`${apiBaseUrl}/cards/${window.selectedCardId}`, {
         method: 'DELETE'
     })
     .then(response => {
         if (!response.ok) {
             throw new Error('Erro ao deletar card');
         }
-        const card = cards[selectedCardId];
+        const card = cards[window.selectedCardId];
 
         // Remove o card de todas as datas relacionadas localmente
         card.dates.forEach(date => {
-            dates[date] = dates[date].filter(id => id !== selectedCardId);
-            if (dates[date].length === 0) delete dates[date];
+            if (dates[date]) {
+                dates[date] = dates[date].filter(id => id !== window.selectedCardId);
+                if (dates[date].length === 0) delete dates[date];
+            }
         });
 
         // Remove o card do objeto cards
-        delete cards[selectedCardId];
+        delete cards[window.selectedCardId];
 
         // Fecha o modal e recarrega a interface
-        closeEditModal();
+        closeModal();
         loadCards(selectedDate);
         updateCalendarMarks();
     })
     .catch(error => console.error('Erro ao excluir card:', error));
 }
+
+
 
 // Funções para pesquisa externa (opcionais)
 function searchGoogleImages(title) {
@@ -575,7 +791,7 @@ function searchGoogleImages(title) {
 }
 
 function searchGoogleImagesFromModal() {
-    const title = document.getElementById("edit-title").value.trim();
+    const title = document.getElementById("card-title").value.trim();
     if (!title) {
         alert("Por favor, insira um título para pesquisar no Google Imagens.");
         return;
@@ -590,7 +806,7 @@ function openYouglish(title) {
 }
 
 function openYouglishFromModal() {
-    const title = document.getElementById("edit-title").value.trim();
+    const title = document.getElementById("card-title").value.trim();
     if (!title) {
         alert("Por favor, insira um título para pesquisar no YouGlish.");
         return;

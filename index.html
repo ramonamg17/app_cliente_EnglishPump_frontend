@@ -11,21 +11,22 @@
     <div class="app-container">
         <!-- Barra Lateral -->
         <div class="sidebar">
+           
             <div class="sidebar-item active" onclick="window.location.href='index.html'">
                 <div class="icon btn">
-                    <img src="assets/images/calendar-solid.svg" alt="Ícone do Calendário" width="20">
+                    <img src="assets/images/calendar-solid.svg" alt="Ícone do Calendário" width="15">
                 </div>
                 <span class="text">Calendar</span>
             </div>
             <div class="sidebar-item" onclick="window.location.href='cards.html'">
                 <div class="icon btn">
-                    <img src="assets/images/list-solid.svg" alt="Ícone Cards" width="20">
+                    <img src="assets/images/list-solid.svg" alt="Ícone Cards" width="15">
                 </div>
                 <span class="text">Cards</span>
             </div>
             <div class="sidebar-item" onclick="window.location.href='settings.html'">
                 <div class="icon btn">
-                    <img src="assets/images/gear-solid.svg" alt="Ícone Settings" width="20">
+                    <img src="assets/images/gear-solid.svg" alt="Ícone Settings" width="15">
                 </div>
                 <span class="text">Settings</span>
             </div>
@@ -52,82 +53,70 @@
         </div>
 
         <!-- Ícone Plus Flutuante -->
-        <button class="add-card-btn btn" onclick="openModal()"><i class="fa-solid fa-plus"></i></button>
+        <button class="add-card-btn btn" onclick="openModal('add')"><i class="fa-solid fa-plus"></i></button>
         <!-- Ícone Visible Flutuante -->
         <div class="eye-toggle btn" onclick="toggleBlur()"><i class="fa-regular fa-eye-slash fa-xs"></i></div>
 
-        <!-- Modal para Adicionar Card -->
+
+
+        <!-- Modal para Adicionar e Editar Card -->
         <div class="modal" id="modal">
-            <div class="modal-content">
+            <!-- Seção de Recalls -->
+            <div class="card-recalls off" id="card-recalls">
                 <div>
-                    <span class="close-btn btn" onclick="closeModal()">×</span>
-                    <h2>Add Card</h2>
+                
+                </div>
+                <div class="card-recalls-restart desactived" onclick="RestartRecalls()" id="card-recalls-restart">
+                    <i class="fa-solid fa-rotate-left"></i>
+                </div>
+            </div>
+            <div class="modal-title">
+                <h2 id="modal-title-text">Add Card</h2>
+                <span class="close-btn btn" onclick="closeModal()">×</span>
+            </div>
+            <div class="modal-content">
+                <div class="modal-content-col">
                     <input type="text" id="card-title" placeholder="Title">
-                    
+
                     <!-- Área para exibir as classificações como labels -->
                     <div id="classifications-labels" class="classifications-labels"></div>
-                    
+
                     <!-- Campo de input para adicionar novas classificações -->
-                     <div>
+                    <div>
                         <div class="classification-field-input">
                             <input type="text" id="classification-input" placeholder="Add Classification">
                             <div id="add-classification-btn" class="add-classification-btn"><i class="fa-solid fa-plus" style="color: #000333;"></i></div>
                         </div>
                         <div id="classification-field"></div>
-                     </div>
-                    
+                    </div>
+
                     <textarea id="card-content" placeholder="Content"></textarea>
                 </div>
+                <div class="vertical-divider resizeble" style="cursor: col-resize;"></div>
+                <div class="modal-content-col llm">
+                    <!-- ... (conteúdo da coluna LLM permanece o mesmo) -->
+                </div>
+            </div>
+            <div class="modal-buttons">
                 <div>
-                    <button class="add-button btn" id="add-card-button" onclick="addCard(event); return false;" type="button">Add</button>
+                    <!-- Botões comuns -->
+                    <button class="google-images-button btn" onclick="searchGoogleImagesFromModal()" type="button">
+                        <i class="fa-regular fa-images" style="font-size: 30px;"></i>
+                    </button>
+                    <button class="youglish-button btn" onclick="openYouglishFromModal()" type="button">
+                        <i class="fa-solid fa-headphones" style="font-size: 30px;"></i>
+                    </button>
+                    <button class="recall-button btn" id="recall-button" onclick="toggleRecalls(); return false;" type="button">RECALL</button>
+                </div>
+                <div>
+                    <!-- Botões que variam conforme o modo -->
+                    <button class="delete-button btn" id="delete-card-button" onclick="deleteCard()" type="button" style="display: none;"><i class="fa-solid fa-trash"></i></button>
+                    <button class="save-button btn" id="save-card-button" onclick="saveCard()" type="button">Save</button>
                 </div>
             </div>
         </div>
 
-
-        <!-- Modal de Edição do Card -->
-        <div class="modal" id="edit-modal">
-            <div class="modal-content">
-                <div>
-                    <span class="close-btn btn" onclick="closeEditModal()">×</span>
-                    <h2>Edit Card</h2>
-                    <div class="title-container">
-                        <input type="text" id="edit-title" placeholder="Title" value="">
-                    </div>
-
-                    <!-- Área para exibir as classificações como labels -->
-                    <div id="edit-classifications-labels" class="classifications-labels"></div>
-
-                    <!-- Campo de input para adicionar novas classificações -->
-                    <div>
-                        <div class="classification-field-input">
-                            <input type="text" id="edit-classification-input" placeholder="Add Classification">
-                            <div id="edit-add-classification-btn" class="add-classification-btn"><i class="fa-solid fa-plus" style="color: #000333;"></i></div>
-                        </div>
-                        <!-- Add a unique suggestions container for the edit modal -->
-                        <div id="edit-classification-field"></div>
-                    </div>
-
-                    <textarea id="edit-content" placeholder="Content"></textarea>
-                </div>
-                <div>
-                    <div class="modal-buttons">
-                        <div>
-                            <button class="delete-button btn" onclick="deleteCard()" type="button"><i class="fa-solid fa-trash"></i></button>
-                        </div>
-                        <div>
-                            <button class="google-images-button btn" onclick="searchGoogleImagesFromModal()" type="button">
-                                <img src="assets/images/googleimages.png" alt="Ícone do Google" width="100">
-                            </button>
-                            <button class="youglish-button btn" onclick="openYouglishFromModal()" type="button">
-                                <img src="assets/images/youglish.png" alt="Ícone do youglish" width="100">
-                            </button>
-                            <button class="save-button btn" onclick="saveEdit()" type="button">Save</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+        
 
 
         <!-- Scripts -->

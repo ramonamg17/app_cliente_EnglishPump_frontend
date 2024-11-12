@@ -10,9 +10,73 @@ body, html {
     background-color: #f8f9fa;
 }
 
+
+textarea {
+    resize: none;
+    overflow-y: scroll;
+}
+
+/* Seleciona o scroll da div */
+textarea::-webkit-scrollbar {
+    width: 8px; /* Largura do scroll */
+    height: 8px; /* Altura do scroll horizontal */
+    padding: 3px;
+}
+
+/* Cor de fundo do scroll */
+.textareas::-webkit-scrollbar-track {
+    background: rgb(255, 255, 255); /* Cor do fundo */
+    border-radius: 5px; /* Bordas arredondadas */
+    
+}
+
+/* Cor e estilo da barra do scroll */
+.textareas::-webkit-scrollbar-thumb {
+    background: #dddcdc; /* Cor da barra */
+    border-radius: 5px; /* Bordas arredondadas */
+}
+
+/* Cor da barra ao passar o mouse */
+.textareas::-webkit-scrollbar-thumb:hover {
+    background: #c6c5c5; /* Cor ao passar o mouse */
+}
+
+
 .app-container {
     display: flex;
     height: 100vh;
+}
+
+.divider {
+    width: 100%;     
+    height: 1px;       
+    background-color: #ddd; 
+    margin: 20px 0;      
+    border: none;        /* Remove bordas extras caso use um <hr> */
+  }
+  
+.vertical-divider {
+width: 2px;               /* Define a espessura do divisor */
+height: 100%;             /* Altura total do contêiner */
+background-color: #ddd;   /* Cor do divisor */
+margin: 0 10px;           /* Espaçamento horizontal ao redor do divisor */
+display: inline-block;    /* Faz o divisor ser exibido inline */
+align-self: stretch;      /* Garante que ele estique dentro de flex containers */
+cursor: col-resize;
+transition: background-color 0.3s, opacity 0.3s;
+}
+
+
+.vertical-divider.resizeble:hover{
+    background-color: #888; /* cor mais escura para o hover */
+    opacity: 0.8; /* um pouco mais opaco */
+    transform: scaleX(1.6);
+    
+}
+
+.vertical-divider.resizeble:active{
+   transform: scaleX(1.30);
+    
 }
 
 .sidebar {
@@ -44,6 +108,10 @@ body, html {
     background-color: #4e4d4d;
 }
 
+.sidebar-item>span{
+    font-size: 9px;
+}
+
 .icon {
     font-size: 24px;
 }
@@ -68,7 +136,8 @@ body, html {
 
 .calendar-container {
     width: 20%;
-    min-width: 290px; /* Define um tamanho mínimo para o calendário */
+    min-width: 290px; 
+    max-width: 300px; 
     background-color: #fff;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     border-radius: 10px;
@@ -284,34 +353,45 @@ body, html {
 
 .modal {
     display: none;
+    flex-direction: column;
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.6);
+    top: 40px;
+    left: 3%;
+    width: 95%;
+    height: 90%;
+    background: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
     justify-content: center;
     align-items: center;
     z-index: 1000; /* Garante que o modal esteja no topo */
+   
+}
+
+.modal-title {
+    padding: 10px;
 }
 
 .modal-content {
     display: flex;
-    flex-direction: column;
-    background: #fff;
-    padding: 30px;
-    border-radius: 10px;
-    width: 90%;
+    flex-direction: row;    
+    padding: 20px;
+    width: 100%;
     height: 95%;
     position: relative;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    
     overflow-y: auto;
     justify-content: space-between;
 }
 
-.modal-content input,
-.modal-content textarea {
-    font-size: 18px;
+.modal-content-col {
+    flex:1;
+}
+
+.modal-content-col input,
+.modal-content-col textarea {
+    font-size: 12px;
+    width: 80%;
 }
 
 /* Ajusta o título do modal */
@@ -325,19 +405,41 @@ body, html {
     justify-content: space-between;
     align-items: center;
     width: 100%;
-    margin-top: 20px;
-    bottom: 25px;
-    right: 25px;
-    /* position: relative; */
+    padding: 20px;
+    
 }
 
 .modal-buttons div{
     display: flex;
 }
 
-.modal-buttons div button{
+.modal-buttons button{
     margin: 0 10px 0 10px;
 }
+
+.recall-button{
+    margin-right: 10px;
+    padding: 10px;
+    /* background-color: #526e8d; */
+    color: #526e8d;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    height: 40px;
+    border-width: 0.5px;
+    border-color: #526e8d;
+    border-style: dotted;
+}
+
+.recall-button.actived{
+    
+    background-color: #526e8d;
+    color: #ffffff;
+    
+}
+
+
 
 .save-button {
     margin-right: 10px;
@@ -432,15 +534,16 @@ body, html {
 
 .modal-content input,
 .modal-content textarea {
-    width: 100%;
+    width: 95%;
     padding: 10px;
     border: 1px solid #ccc;
     border-radius: 5px;
-    font-size: 16px;
+    font-size: 12px;
 }
 
+
 .add-button {
-    width: 100%;
+    width: 100px;
     padding: 10px;
     background-color: #28a745;
     color: #fff;
@@ -599,6 +702,10 @@ body, html {
     background-color: #f3efef;
 }
 
+.add-classification-btn:active {
+    transform: scale(0.95);
+}
+
 
 .classification-selector {
     display: flex;
@@ -610,6 +717,34 @@ body, html {
     display: flex;
     flex-wrap: wrap;
     margin-right: 10px;
+}
+
+.classification-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.classification-header h5 {
+    margin: 0;
+}
+
+.classification-header .add-classification-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.classification-list-container input {
+    width: 100%;
+    padding: 5px;
+    margin-bottom: 10px;
+}
+
+.cards-list input {
+    width: 100%;
+    padding: 5px;
+    margin-bottom: 10px;
 }
 
 .classification-tree-container {
@@ -728,19 +863,21 @@ body, html {
 .classification-field-input {
     display: flex;
     align-items: center;
-    margin-bottom: 10px;
+    margin-bottom: 20px;
 }
 
 .suggestions {
     padding: 5px;
     position: absolute;
-    width: 90%;
+    width: 45%;
     border-radius: 5px;
     background-color: #fff;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     max-height: 50%;
     overflow-y: scroll;
     scrollbar-width: none; /* Esconde o scrollbar no Firefox */
+    max-width: 500px;
+    transform: translateY(-20px)
 
 }
 
@@ -751,9 +888,165 @@ body, html {
 .suggestions>div {
     padding: 5px;
     border-radius: 5px;
+    font-size: 11px;
 }
 
 .suggestions>div:hover {
     cursor: pointer;
     background-color: #f3efef;
+}
+
+#card-content{
+    max-height: 75%;
+}
+
+.modal-content-col.llm{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.llm-answers{
+    padding: 20px; 
+    box-shadow: 0px 0px 14px 2px rgba(157, 156, 156, 0.2);
+    border-radius: 5px;
+    overflow-y: scroll; 
+    max-height: 90%; 
+    width: 90%;
+    margin-bottom: 15px;
+}
+
+.llm-answers p{
+    font-size: 13px;
+    letter-spacing: 0.5px;
+}
+
+.textarea-container {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+#llm-input{
+       padding-bottom: 25px;
+       padding-right: 25px;
+       position: relative;
+       box-sizing: border-box;
+}
+
+.llm-input-button {
+    position: absolute;
+    right: 2.5%; /* Ajuste conforme necessário */
+    bottom: 2px; /* Ajuste conforme necessário */
+    cursor: pointer;
+    color: #afadad;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .llm-input-button:hover {
+    cursor: pointer;
+    color: #9f9d9d;
+  
+  }
+  .llm-input-button:active {
+    cursor: pointer;
+    color: #9f9d9d;
+    transform: scale(0.95);
+  
+  }
+  
+  .submit-button i {
+    font-size: 16px; /* Tamanho do ícone */
+  }
+
+  
+
+
+.modal-content-col.llm textarea{
+    max-height: 100px;
+}
+
+/* Seleciona o scroll da div */
+.llm-answers::-webkit-scrollbar {
+    width: 8px; /* Largura do scroll */
+    height: 8px; /* Altura do scroll horizontal */
+    padding: 3px;
+}
+
+/* Cor de fundo do scroll */
+.llm-answers::-webkit-scrollbar-track {
+    background: rgb(255, 255, 255); /* Cor do fundo */
+    border-radius: 5px; /* Bordas arredondadas */
+    
+}
+
+/* Cor e estilo da barra do scroll */
+.llm-answers::-webkit-scrollbar-thumb {
+    background: #dddcdc; /* Cor da barra */
+    border-radius: 5px; /* Bordas arredondadas */
+}
+
+/* Cor da barra ao passar o mouse */
+.llm-answers::-webkit-scrollbar-thumb:hover {
+    background: #c6c5c5; /* Cor ao passar o mouse */
+}
+
+
+.card-recalls{
+    position: absolute;
+    height: 30px;
+    background-color: #526e8d;
+    border-radius: 4px;
+    box-shadow: 0px 0px 14px 2px rgba(157, 156, 156, 0.2);
+    top: 10px;
+    left: -5px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-right: 15px;
+    transition: opacity 0.2s ease-in;
+}
+
+.card-recalls > div:first-child{
+    flex:1;
+    margin-right: 10px;
+    height: 30px;
+    padding-left: 15px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+.card-recalls.off{  
+   opacity: 0%;
+   /* display: none; */
+}
+
+.card-recalls>div>i{
+    color: #ebeaea;
+}
+
+.card-recalls-restart{
+    cursor: pointer;
+}
+
+.card-recalls-restart:hover{
+    transform: scale(1.05);
+}
+
+.card-recalls-restart:active{
+    transform: scale(0.95);
+}
+
+
+
+
+.desactived{
+    opacity: 30%;
+    pointer-events: none;
 }
