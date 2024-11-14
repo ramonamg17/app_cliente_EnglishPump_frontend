@@ -1,11 +1,5 @@
 // script.js
 
-let dates = {};
-let selectedDate = null;
-let selectedCardId = null;
-let currentClassifications = [];
-let currentRecallStatus = false;
-let currentCardDates = [];
 
 // A variável 'cards' é declarada em 'common.js' e compartilhada entre os arquivos
 
@@ -14,38 +8,30 @@ function loadAllCards(date) {
     return fetch(`${apiBaseUrl}/cards`)
         .then(response => response.json())
         .then(data => {
-            // Limpa o conteúdo atual de cards e dates
             cards = {};
             dates = {};
 
-            // Preenche cards e dates com os dados do servidor
+
+            data = data.sort((a, b) => a.title.localeCompare(b.title));
             data.forEach(card => {
-                // Assegura que card.dates é um array
                 cards[card.id] = {
                     id: card.id,
                     title: card.title,
                     content: card.content,
                     dates: card.dates || [],
                     classifications: card.classifications || [],
-                    recall:card.recall
+                    recall: card.recall
                 };
 
-                // Popula as datas com os IDs dos cards relacionados
                 cards[card.id].dates.forEach(date => {
                     if (!dates[date]) dates[date] = [];
                     dates[date].push(card.id);
                 });
             });
 
-            // Define o dia atual como o dia selecionado
             const today = new Date();
-            if (date){
-                selectedDate = date;
-            }else{
-                selectedDate = formatDate(today);
-            }
+            selectedDate = date || formatDate(today);
 
-            // Renderiza o calendário e carrega os cards do dia atual
             renderCalendar();
             loadCards(selectedDate);
         })
@@ -54,6 +40,7 @@ function loadAllCards(date) {
 
 // Função para abrir o modal (adicionar ou editar)
 function openModal(mode, id) {
+    document.body.classList.add('modal-open');
     document.querySelector('.sidebar').classList.add('desactived');
     document.getElementById("modal").style.display = "flex";
 
@@ -67,8 +54,13 @@ function openModal(mode, id) {
         modalTitleText.textContent = "Add Card";
         document.getElementById("card-title").value = "";
         document.getElementById("card-content").value = "";
-        currentClassifications = [];
+        // Define 'INBOX' como classificação padrão
+        currentClassifications = ['INBOX'];
         document.getElementById("classifications-labels").innerHTML = "";
+        
+        // Adiciona a label 'INBOX' na interface
+        addClassificationLabel('INBOX', 'classifications-labels');
+        
         document.getElementById("classification-input").value = "";
         deleteButton.style.display = "none";
 
@@ -82,6 +74,7 @@ function openModal(mode, id) {
         document.getElementById("card-title").value = card.title;
         document.getElementById("card-content").value = card.content;
         currentClassifications = card.classifications.slice();
+        currentClassifications = sortClassifications(currentClassifications);
         const labelsContainer = document.getElementById("classifications-labels");
         labelsContainer.innerHTML = "";
         currentClassifications.forEach(classification => {
@@ -95,13 +88,15 @@ function openModal(mode, id) {
         updateCardRecallsUI();
     }
 
-    setupClassificationInput('classification-input', 'classifications-labels', 'add-classification-btn', 'classification-field');
+    setupClassificationInput('classification-input', 'classifications-labels', 'classification-field');
     setupClassificationAutocomplete('classification-input');
 }
 
 
 // Função para fechar o modal
 function closeModal() {
+    document.getElementById('overlay').style.display = 'none';
+    document.body.classList.remove('modal-open');
     document.getElementById("modal").style.display = "none";
     document.querySelector('.sidebar').classList.remove('desactived');
     window.modalMode = null;
@@ -230,221 +225,9 @@ function RestartRecalls() {
 
 
 
-// Função para adicionar uma label de classificação
-function addClassificationLabel(classification, labelsContainerId) {
-    // Só adiciona à lista se ainda não estiver presente
-    if (!currentClassifications.includes(classification)) {     
-        currentClassifications.push(classification);
-    }
-
-    const labelsContainer = document.getElementById(labelsContainerId);
-
-    // Verifica se a label já existe no container para evitar duplicatas visuais
-    const existingLabels = labelsContainer.querySelectorAll('.classification-label');
-    for (let label of existingLabels) {
-        if (label.firstChild.textContent === classification) {
-            return; // Label já existe no container, não precisa adicionar novamente
-        }
-    }
-
-    const label = document.createElement('span');
-    label.className = 'classification-label';
-    label.textContent = classification;
-
-    const removeBtn = document.createElement('button');
-    removeBtn.className = 'remove-classification-btn';
-    removeBtn.innerHTML = '&times;';
-    removeBtn.onclick = function() {
-        labelsContainer.removeChild(label);
-        currentClassifications = currentClassifications.filter(c => c !== classification);
-    };
-
-    label.appendChild(removeBtn);
-    labelsContainer.appendChild(label);
-}
-
-
-function setupClassificationInput(inputId, labelsContainerId, buttonId, suggestionsContainerId) {
-    const input = document.getElementById(inputId);
-    if (!input) {
-        console.error(`Elemento com ID ${inputId} não encontrado em setupClassificationInput.`);
-        return;
-    }
-    const button = document.getElementById(buttonId);
-    if (!button) {
-        console.error(`Botão com ID ${buttonId} não encontrado em setupClassificationInput.`);
-        return;
-    }
-    input.setAttribute('data-labels-container-id', labelsContainerId);
-    input.setAttribute('data-suggestions-container-id', suggestionsContainerId);
-
-    function addClassificationFromInput() {
-        if (input.value.trim() !== '') {
-            addClassificationLabel(input.value.trim(), labelsContainerId);
-            input.value = '';
-        }
-    }
-
-    input.addEventListener('keydown', function(event) {
-        if (event.key === 'Enter') {
-            event.preventDefault();
-            addClassificationFromInput();
-        }
-    });
-
-    button.addEventListener('click', function(event) {
-        event.preventDefault();
-        addClassificationFromInput();
-    });
-}
-
-// Função para configurar o autocomplete das classificações
-function setupClassificationAutocomplete(inputId) {
-    const input = document.getElementById(inputId);
-    if (!input) {
-        console.error(`Elemento com ID ${inputId} não encontrado em setupClassificationAutocomplete.`);
-        return;
-    }
-    const existingClassifications = getAllClassifications();
-
-    function showSuggestionsOnEvent() {
-        const value = input.value.trim().toLowerCase();
-        const suggestions = existingClassifications.filter(c => c.toLowerCase().includes(value));
-        showSuggestions(input, suggestions);
-    }
-
-    // Show suggestions when input is focused
-    input.addEventListener("focus", showSuggestionsOnEvent);
-
-    // Show suggestions when input value changes
-    input.addEventListener("input", showSuggestionsOnEvent);
-}
-
-// Função para mostrar as sugestões de classificações
-function showSuggestions(input, suggestions) {
-    // Get the suggestions container ID from the data attribute
-    const suggestionsContainerId = input.getAttribute('data-suggestions-container-id');
-    const suggestionsContainer = document.getElementById(suggestionsContainerId);
-
-    // Remove previous suggestions
-    suggestionsContainer.innerHTML = '';
-
-    if (suggestions.length === 0) return;
-
-    const suggestionsDiv = document.createElement("div");
-    suggestionsDiv.className = "suggestions";
-
-    suggestions.forEach(suggestion => {
-        const suggestionDiv = document.createElement("div");
-        suggestionDiv.textContent = suggestion;
-
-        // Define behavior when clicking on a suggestion
-        suggestionDiv.onclick = () => {
-            addClassificationLabel(suggestion, input.getAttribute('data-labels-container-id'));
-            input.value = '';
-            suggestionsContainer.innerHTML = ''; // Remove suggestions after selection
-        };
-
-        suggestionsDiv.appendChild(suggestionDiv);
-    });
-
-    suggestionsContainer.appendChild(suggestionsDiv);
-
-    // Add event listener to hide suggestions when clicking outside
-    document.addEventListener('click', function hideSuggestions(event) {
-        if (!suggestionsContainer.contains(event.target) && event.target !== input) {
-            suggestionsContainer.innerHTML = '';
-            document.removeEventListener('click', hideSuggestions);
-        }
-    });
-}
 
 
 
-// // Função para adicionar um card
-// function addCard(event) {
-//     if (event) event.preventDefault();
-
-//     const title = document.getElementById("card-title").value.trim();
-//     const content = document.getElementById("card-content").value.trim();
-//     const classifications = currentClassifications;
-
-//     if (!title) {
-//         alert("Por favor, preencha todos os campos");
-//         return;
-//     }
-
-//     // Assegura que selectedDate esteja definido
-//     const today = new Date();
-//     if (!selectedDate) {
-//         selectedDate = formatDate(today);
-//     }
-
-//     const newCard = {
-//         title: title,
-//         content: content,
-//         dates: [
-//             selectedDate,
-//             getNextDate(selectedDate, 1),
-//             getNextDate(selectedDate, 2),
-//             getNextDate(selectedDate, 7),
-//             getNextDate(selectedDate, 21),
-//             getNextDate(selectedDate, 30),
-//             getNextDate(selectedDate, 60),
-//             getNextDate(selectedDate, 90),
-//         ],
-//         classifications: classifications
-//     };
-
-//     fetch(`${apiBaseUrl}/cards`, {
-//         method: 'POST',
-//         headers: { 'Content-Type': 'application/json' },
-//         body: JSON.stringify(newCard),
-//         mode: 'cors',
-//     })
-//     .then(response => {
-//         if (!response.ok) {
-//             throw new Error(`Erro na resposta do servidor: ${response.status} ${response.statusText}`);
-//         }
-//         return response.json();
-//     })
-//     .then(data => {
-//         if (!data || !data.id) {
-//             throw new Error('Resposta do servidor inválida. Dados retornados: ' + JSON.stringify(data));
-//         }
-
-//         // Atualiza os dados localmente sem alterar `selectedDate`
-//         cards[data.id] = data;
-//         data.dates.forEach(date => {
-//             if (!dates[date]) dates[date] = [];
-//             dates[date].push(data.id);
-//         });
-
-//         closeModal();
-//         loadCards(selectedDate);
-//         updateCalendarMarks();
-//     })
-//     .catch(error => {
-//         console.error('Erro ao adicionar card:', error);
-//         alert('Erro ao adicionar card: ' + error.message);
-//     });
-// }
-
-// Função auxiliar para obter a próxima data
-function getNextDate(dateString, days) {
-    const [year, month, day] = dateString.split('-').map(Number);
-    const currentDate = new Date(year, month - 1, day);
-    currentDate.setDate(currentDate.getDate() + days);
-    return formatDate(currentDate);
-}
-
-// Função para formatar a data no formato YYYY-MM-DD
-function formatDate(date) {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0'); // Mês começa em 0
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-}
 
 // Variáveis para o calendário
 const monthYear = document.getElementById("month-year");
@@ -583,7 +366,9 @@ function loadCards(date) {
         classificationsEl.className = "card-classifications";
 
         if (card.classifications) {
-            card.classifications.forEach(classification => {
+            // Ordena as classificações antes de criar as labels
+            let sortedClassifications = sortClassifications(card.classifications);
+            sortedClassifications.forEach(classification => {
                 const label = document.createElement("span");
                 label.className = "classification-label";
                 label.textContent = classification;
@@ -622,13 +407,6 @@ function nextMonth() {
     renderCalendar();
 }
 
-// Função para alternar o blur nas descrições dos cards
-function toggleBlur() {
-    const descriptions = document.querySelectorAll('.card p');
-    descriptions.forEach(description => {
-        description.classList.toggle('visible'); // Adiciona ou remove a classe 'visible'
-    });
-}
 
 // Função para salvar o card (adicionar ou editar)
 function saveCard(close_modal) {
@@ -783,49 +561,7 @@ function deleteCard() {
 
 
 
-// Funções para pesquisa externa (opcionais)
-function searchGoogleImages(title) {
-    const query = encodeURIComponent(title);
-    const url = `https://www.google.com/search?tbm=isch&q=${query}`;
-    window.open(url, '_blank');
-}
 
-function searchGoogleImagesFromModal() {
-    const title = document.getElementById("card-title").value.trim();
-    if (!title) {
-        alert("Por favor, insira um título para pesquisar no Google Imagens.");
-        return;
-    }
-    searchGoogleImages(title);
-}
-
-function openYouglish(title) {
-    const query = encodeURIComponent(title);
-    const url = `https://youglish.com/pronounce/${query}/english`;
-    window.open(url, '_blank');
-}
-
-function openYouglishFromModal() {
-    const title = document.getElementById("card-title").value.trim();
-    if (!title) {
-        alert("Por favor, insira um título para pesquisar no YouGlish.");
-        return;
-    }
-    openYouglish(title);
-}
-
-// Função para obter todas as classificações existentes a partir dos cards
-function getAllClassifications() {
-    const classificationsSet = new Set();
-    Object.values(cards).forEach(card => {
-        if (card.classifications) {
-            card.classifications.forEach(classification => {
-                classificationsSet.add(classification);
-            });
-        }
-    });
-    return Array.from(classificationsSet).sort();
-}
 
 // Inicializa a página ao carregar
 document.addEventListener("DOMContentLoaded", function() {

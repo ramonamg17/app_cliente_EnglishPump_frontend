@@ -8,6 +8,7 @@ body, html {
     height: 100%;
     font-family: Arial, sans-serif;
     background-color: #f8f9fa;
+    overflow: scroll;
 }
 
 
@@ -41,6 +42,35 @@ textarea::-webkit-scrollbar {
     background: #c6c5c5; /* Cor ao passar o mouse */
 }
 
+/* Estilo para o overlay */
+#overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Cor preta semitransparente */
+    z-index: 999; /* Certifique-se de que está acima dos outros elementos */
+    display: none; /* Inicialmente escondido */
+    
+}
+
+body.modal-open #overlay {
+    display: block;
+}
+
+body.modal-open > *:not(#modal):not(#overlay) {
+    pointer-events: none;
+}
+
+#modal, #overlay {
+    pointer-events: auto;
+}
+
+body.modal-open {
+    overflow: hidden;
+    
+}
 
 .app-container {
     display: flex;
@@ -236,15 +266,38 @@ transition: background-color 0.3s, opacity 0.3s;
     grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
     gap: 20px;
     padding: 20px;
-    width: 100%; /* Assegura que o container ocupa toda a largura disponível */
+    width: 100%;
     box-sizing: border-box;
-    margin-left: 300px;
     align-self: start;
+    margin-top: 50px;
+    
 }
 
 /* Responsividade para telas menores */
 @media (max-width: 800px) {
     .card-container {
+        grid-template-columns: 1fr;
+        display: flex;
+        flex-direction: column;
+    }
+}
+
+.card-container-calendar {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 20px;
+    padding: 20px;
+    width: 100%;
+    box-sizing: border-box;
+    align-self: start;
+    margin-top: 40px;
+    margin-left: 300px;
+    
+}
+
+/* Responsividade para telas menores */
+@media (max-width: 800px) {
+    .card-container-calendar {
         grid-template-columns: 1fr;
         display: flex;
         flex-direction: column;
@@ -261,14 +314,15 @@ transition: background-color 0.3s, opacity 0.3s;
 
 .card {
     background: #fff;
-    padding: 15px 15px;
+    padding: 10px 15px;
     border-radius: 5px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     width: 100%;
-    height: 70px;
+    height: auto;
     margin-bottom: 10px;
     transition: all 0.3s ease; /* Suaviza a transição do efeito */
     cursor: pointer; /* Aponta que o card é clicável */
+    position: relative;
 }
 
 /* Efeito de hover nos cards */
@@ -290,21 +344,43 @@ transition: background-color 0.3s, opacity 0.3s;
     filter: blur(5px); /* Aplica o blur padrão */
     transition: filter 0.3s ease; /* Transição suave para o efeito */
     overflow: hidden;
+    
+}
+
+.card.no-classification h4 {
+    margin-top: 20px;
+}
+
+
+.card input{
+    width: 15px;
+    height: 15px;
+    position: absolute;
+    top:40%;
+}
+
+.card .recall-icon {
+    position: absolute;
+    top: 10px;
+    left: 0px;
+    font-size: 18px;
+    transform: rotate(-16deg);
+    color: #526e8d; /* Uma cor que se destaque, ajuste conforme desejado */
 }
 
 .card-classifications {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: wrap; /* Permite que o conteúdo quebre em múltiplas linhas */
     justify-content: flex-end;
-    position: absolute;
+    /* position: absolute; */
     overflow: hidden;
-    text-overflow: ellipsis;
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
     transform: translateY(-25px);
 }
 
+
+.card-content{
+    min-height: 40px;
+}
 
 
 /* Classe para remover o blur */
@@ -593,7 +669,43 @@ transition: background-color 0.3s, opacity 0.3s;
 }
 
 .classification-item {
-    margin-left: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 5px 10px;
+    cursor: pointer;
+    margin-top: 2px;
+}
+
+.classification-item:hover {
+    background-color: #f0f0f0;
+}
+
+.classification-item:not(.editing):active {
+    transform: scale(0.99);
+}
+
+.classification-text {
+    flex: 1;
+}
+
+.classification-actions {
+    display: flex;
+    align-items: center;
+}
+
+.classification-icon {
+    margin-left: 5px;
+    cursor: pointer;
+    color: #6c757d;
+}
+
+.classification-icon:hover {
+    color: #343a40;
+}
+
+.classification-item.selected {
+    background-color: #e0e0e0;
 }
 
 .classification-item input[type="checkbox"] {
@@ -603,6 +715,15 @@ transition: background-color 0.3s, opacity 0.3s;
 .classification-item label {
     cursor: pointer;
 }
+
+.classification-edit-input {
+    width: 100%;
+    font-size: 14px;
+    padding: 2px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+}
+
 
 
 .delete-classification-btn {
@@ -625,6 +746,11 @@ transition: background-color 0.3s, opacity 0.3s;
 .cards-list {
     padding: 20px;
     width: 100%;
+    display: flex;
+    flex-direction: column;
+    flex: 3;
+    padding: 20px;
+    margin-left: 300px;
 }
 
 .card-item {
@@ -638,6 +764,8 @@ transition: background-color 0.3s, opacity 0.3s;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     transition: background-color 0.3s;
 }
+
+
 
 .card-info h4 {
     margin-bottom: 5px;
@@ -672,16 +800,14 @@ transition: background-color 0.3s, opacity 0.3s;
     padding: 2px 5px;
     font-size: 12px;
     margin-right: 5px;
+    margin-top: 2px;
+    
 }
 
 .main-content {
     display: flex;
 }
 
-.cards-list {
-    flex: 3;
-    padding: 20px;
-}
 
 
 
@@ -723,6 +849,107 @@ transition: background-color 0.3s, opacity 0.3s;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    margin-bottom: 10px;
+}
+
+.card-list-overlay {
+    background-color: #f8f9fa;
+    width:75%;
+    height: 80px;
+    position: absolute;
+    margin-left: 330px;
+    filter: blur(4px); /* Ajuste o valor do blur conforme desejado */
+    opacity: 0.8;
+    z-index: 1;
+    right: 40px;
+    top:0px
+}
+
+
+.cards-search {
+    position: relative;
+    display: inline-block;
+    align-self: center;
+    position: fixed;
+    z-index: 1;
+    width: 500px;
+    display: flex;
+    justify-content: center;
+    justify-content: center
+}
+
+.cards-search i {
+    position: absolute;
+    left: 150px;
+    top: 35%;
+    color: #999;
+    pointer-events: none;
+}
+
+
+.cards-search input{
+    border-radius: 20px;
+    border-style: solid;
+    border-width: 0.5px;
+    padding: 0px 15px;
+    padding-left: 30px;
+    height: 25px;
+    margin-bottom: 10px;
+    box-sizing: border-box; 
+}
+
+.cards-selector {
+    position: absolute;
+    font-size: 10px;
+    cursor: pointer;
+    background-color: #f8f9fa;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    padding: 10px;
+    right: 5%;
+    z-index: 1;
+    transition: all 0.2s ease; /* Adiciona transição suave para todas as propriedades */
+    border: 1px solid transparent; /* Define borda transparente para começar */
+}
+
+.cards-selector.actived {
+    border: 1px inset rgba(0, 0, 0, 0.2); /* Muda para um estilo de borda suave ao ser ativado */
+    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2); /* Adiciona sombra interna para o efeito de "pressionado" */
+    background-color: #e9ecef; /* Alterne a cor de fundo, se desejar */
+}
+
+
+.cards-selector:hover {
+    background-color: #ebedf0;
+}
+
+.cards-selector:active{
+    transform: scale(0.95);
+}
+
+.classification-search {
+    position: relative;
+    display: inline-block;
+    position: fixed;
+}
+
+.classification-search i {
+    position: absolute;
+    left: 10px;
+    top: 35%;
+    color: #999;
+    pointer-events: none;
+}
+
+
+.classification-search input{
+    border-radius: 20px;
+    border-style: solid;
+    border-width: 0.5px;
+    padding: 0px 15px;
+    padding-left: 30px;
+    height: 25px;
+    margin-bottom: 10px;
+    box-sizing: border-box; 
 }
 
 .classification-header h5 {
@@ -735,39 +962,13 @@ transition: background-color 0.3s, opacity 0.3s;
     cursor: pointer;
 }
 
-.classification-list-container input {
+/* .classification-list-container input {
     width: 100%;
     padding: 5px;
     margin-bottom: 10px;
-}
+} */
 
-.cards-list input {
-    width: 100%;
-    padding: 5px;
-    margin-bottom: 10px;
-}
 
-.classification-tree-container {
-    flex: 1;
-    padding: 20px;
-    border-left: 1px solid #ccc;
-}
-
-.classification-tree-container h3 {
-    margin-bottom: 10px;
-}
-
-.classification-tree-navigation .classification-item {
-    cursor: pointer;
-}
-
-.classification-tree-navigation .classification-item:hover {
-    background-color: #f0f0f0;
-}
-
-.classification-item {
-    margin: 5px 0;
-}
 
 .classification-item .toggle-button {
     background: none;
@@ -781,9 +982,14 @@ transition: background-color 0.3s, opacity 0.3s;
     text-decoration: underline;
 }
 
+#classification-list{
+    margin-top: 50px;
+}
 .classification-list-container{
     width: 260px;
     padding: 10px;
+    position: fixed;
+    z-index: 10;
 }
 
 .classification-list-container ul {
@@ -906,22 +1112,32 @@ transition: background-color 0.3s, opacity 0.3s;
     align-items: center;
 }
 
-.llm-answers{
-    padding: 20px; 
+.llm-answers-container {
+    padding: 20px 0px;
     box-shadow: 0px 0px 14px 2px rgba(157, 156, 156, 0.2);
     border-radius: 5px;
-    overflow-y: scroll; 
     max-height: 90%; 
     width: 90%;
     margin-bottom: 15px;
+    overflow: hidden;
+    transition: box-shadow 0.3s ease, transform 0.3s ease; /* Transição suave */
 }
+
+.llm-answers {
+    overflow-y: scroll;
+    max-height: 100%;
+    padding: 5px 15px;
+    scroll-behavior: smooth; /* Rolagem suave */
+}
+
+
 
 .llm-answers p{
     font-size: 13px;
     letter-spacing: 0.5px;
 }
 
-.textarea-container {
+.llm-textarea-container {
     position: relative;
     display: inline-block;
     width: 100%;
@@ -931,6 +1147,7 @@ transition: background-color 0.3s, opacity 0.3s;
   }
 
 #llm-input{
+       min-height: 50px;
        padding-bottom: 25px;
        padding-right: 25px;
        position: relative;
@@ -971,6 +1188,7 @@ transition: background-color 0.3s, opacity 0.3s;
 .modal-content-col.llm textarea{
     max-height: 100px;
 }
+
 
 /* Seleciona o scroll da div */
 .llm-answers::-webkit-scrollbar {
@@ -1044,9 +1262,41 @@ transition: background-color 0.3s, opacity 0.3s;
 }
 
 
+.delete-selected-btn.btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: #526e8d;
+    color: #fff;
+    font-size: 20px;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    width: 50px;
+    height: 50px;
+}
+
+
+.delete-selected-btn:hover {
+    background-color: #333;
+}
+
+.card.selectable {
+    /* border: 1px solid #333; */
+    position: relative;
+}
+
+.card-select-checkbox {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    /* Outros estilos */
+}
+
 
 
 .desactived{
     opacity: 30%;
     pointer-events: none;
 }
+
